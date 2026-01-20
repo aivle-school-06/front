@@ -1,0 +1,8 @@
+{
+  "name": "SENTINEL - Partner Intelligence Hub",
+  "description": "An enterprise-grade partner management and decision support system with a calm, owl-themed aesthetic. Features real-time vendor insights, risk assessment, and AI-driven decision assistance.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
