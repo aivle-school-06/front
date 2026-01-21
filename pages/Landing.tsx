@@ -164,7 +164,7 @@ const Landing: React.FC = () => {
                 margin: '0',
                 pointerEvents: 'none'
               }}
-              src="https://www.canva.com/design/DAG-2OmNUsU/8ieYNUgdhZdsG8f009Nh2Q/view?embed" 
+              src="./img/owl.mp4" 
               allowFullScreen={true} 
               allow="fullscreen"
               title="Sentinel Background Atmosphere"
