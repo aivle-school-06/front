@@ -5,7 +5,6 @@ import Dashboard from './pages/Dashboard';
 import Partners from './pages/Partners';
 import PartnerDetail from './pages/PartnerDetail';
 import DecisionRoom from './pages/DecisionRoom';
-import Intelligence from './pages/Intelligence';
 import Landing from './pages/Landing';
 
 const SidebarItem = ({ to, icon, label }: { to: string; icon: string; label: string }) => {
@@ -42,7 +41,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <SidebarItem to="/dashboard" icon="fa-th-large" label="Dashboard" />
           <SidebarItem to="/partners" icon="fa-handshake" label="Partners" />
           <SidebarItem to="/decisions" icon="fa-balance-scale" label="Decision Room" />
-          <SidebarItem to="/intelligence" icon="fa-brain" label="Intelligence" />
         </nav>
 
         <div className="p-6 border-t border-white/5">
@@ -86,7 +84,6 @@ const App: React.FC = () => {
         <Route path="/partners" element={<DashboardLayout children={<Partners />} />} />
         <Route path="/partners/:id" element={<DashboardLayout children={<PartnerDetail />} />} />
         <Route path="/decisions" element={<DashboardLayout children={<DecisionRoom />} />} />
-        <Route path="/intelligence" element={<DashboardLayout children={<Intelligence />} />} />
       </Routes>
     </Router>
   );
