@@ -135,7 +135,6 @@ const Landing: React.FC = () => {
           
           <div className="hidden md:flex items-center space-x-10 text-[10px] uppercase tracking-[0.2em] font-medium text-slate-400">
             <a href="#platform" className="hover:text-white transition-colors">Platform</a>
-            <a href="#intelligence" className="hover:text-white transition-colors">Intelligence</a>
             <a href="#network" className="hover:text-white transition-colors">Network</a>
             <button 
               onClick={() => { setAuthMode('login'); setShowAuth(true); }}

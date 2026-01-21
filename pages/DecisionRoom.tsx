@@ -1,7 +1,5 @@
 
 import React, { useState } from 'react';
-import { getDecisionSupport } from '../services/geminiService';
-import { Message } from '../types';
 
 interface Notice {
   id: number;
@@ -44,28 +42,8 @@ const NOTICES: Notice[] = [
 ];
 
 const DecisionRoom: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'exchange' | 'archive'>('exchange');
+  const [viewMode, setViewMode] = useState<'bulletins' | 'archive'>('bulletins');
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [chat, setChat] = useState<Message[]>([
-    { role: 'assistant', content: 'Welcome to the Intelligence Exchange. I am SENTINEL. Please submit your strategic queries or review the latest bulletins.', timestamp: new Date() }
-  ]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || loading) return;
-
-    const userMessage: Message = { role: 'user', content: input, timestamp: new Date() };
-    setChat(prev => [...prev, userMessage]);
-    setInput('');
-    setLoading(true);
-
-    const response = await getDecisionSupport(input);
-    const aiMessage: Message = { role: 'assistant', content: response || '', timestamp: new Date() };
-    setChat(prev => [...prev, aiMessage]);
-    setLoading(false);
-  };
 
   return (
     <div className="h-full flex flex-col animate-in fade-in duration-500 relative">
@@ -121,17 +99,17 @@ const DecisionRoom: React.FC = () => {
 
       <header className="mb-10 flex justify-between items-end">
         <div>
-          <h2 className="text-4xl font-light serif text-white mb-2">Bulletin & Exchange</h2>
-          <p className="text-slate-400">Official announcements and strategic Q&A council.</p>
+          <h2 className="text-4xl font-light serif text-white mb-2">Bulletin Room</h2>
+          <p className="text-slate-400">Official announcements and archived partner directives.</p>
         </div>
         <div className="flex space-x-2">
            <button 
-             onClick={() => setViewMode('exchange')}
+             onClick={() => setViewMode('bulletins')}
              className={`px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold transition-all border ${
-               viewMode === 'exchange' ? 'bg-white text-black border-white' : 'text-slate-500 border-white/10 hover:border-white/20'
+               viewMode === 'bulletins' ? 'bg-white text-black border-white' : 'text-slate-500 border-white/10 hover:border-white/20'
              }`}
            >
-             Intelligence Exchange
+             Bulletins
            </button>
            <button 
              onClick={() => setViewMode('archive')}
@@ -144,111 +122,50 @@ const DecisionRoom: React.FC = () => {
         </div>
       </header>
 
-      {viewMode === 'exchange' ? (
+      {viewMode === 'bulletins' ? (
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in slide-in-from-left-4 duration-500">
-          {/* Left: Strategic Q&A */}
-          <div className="lg:col-span-8 flex flex-col space-y-6">
-            <div className="glass-panel rounded-3xl flex flex-col h-[600px] overflow-hidden">
-              <div className="px-8 py-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Intelligence Exchange</h3>
-                <span className="text-[10px] text-slate-600">Querying SENTINEL-OWL v3.4</span>
+          <div className="lg:col-span-12 flex flex-col space-y-6">
+            <div className="glass-panel p-10 rounded-3xl">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center">
+                  <i className="fas fa-bullhorn mr-3 text-slate-600"></i>
+                  Strategic Bulletins
+                </h3>
+                <button
+                  onClick={() => setViewMode('archive')}
+                  className="text-[10px] uppercase tracking-widest text-slate-500 hover:text-white transition-all flex items-center"
+                >
+                  View Archive <i className="fas fa-chevron-right ml-2 text-[8px]"></i>
+                </button>
               </div>
-              
-              <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
-                {chat.map((msg, i) => (
-                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] p-5 rounded-3xl ${
-                      msg.role === 'user' 
-                      ? 'bg-slate-200 text-black rounded-tr-sm' 
-                      : 'bg-white/5 border border-white/10 text-slate-300 rounded-tl-sm'
-                    }`}>
-                      {msg.role === 'assistant' && (
-                        <div className="flex items-center space-x-2 mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                          <i className="fas fa-eye"></i>
-                          <span>Sentinel Expert Response</span>
-                        </div>
-                      )}
-                      <p className="text-sm leading-relaxed">{msg.content}</p>
-                      <span className="text-[9px] opacity-40 mt-3 block text-right font-mono">
-                        {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {NOTICES.map((notice) => (
+                  <div 
+                    key={notice.id} 
+                    className="p-6 bg-white/5 border border-white/5 rounded-2xl hover:border-white/20 hover:bg-white/[0.07] transition-all cursor-pointer group"
+                    onClick={() => setSelectedNotice(notice)}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <span className={`text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded border ${
+                        notice.category === 'Urgent' ? 'text-rose-400 border-rose-900 bg-rose-950/20' :
+                        notice.category === 'Update' ? 'text-emerald-400 border-emerald-900 bg-emerald-950/20' :
+                        'text-slate-400 border-slate-800 bg-slate-900/40'
+                      }`}>
+                        {notice.category}
                       </span>
+                      <span className="text-[10px] text-slate-600 font-mono">{notice.date}</span>
+                    </div>
+                    <h4 className="text-sm font-medium text-white mb-3 group-hover:text-slate-200">{notice.title}</h4>
+                    <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">
+                      {notice.excerpt}
+                    </p>
+                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center text-[9px] uppercase tracking-widest text-slate-600 group-hover:text-slate-400">
+                      <span>Read Full Bulletin</span>
+                      <i className="fas fa-arrow-right ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
                     </div>
                   </div>
                 ))}
-                {loading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl rounded-tl-sm animate-pulse">
-                      <div className="flex space-x-2">
-                        <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"></div>
-                        <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                        <div className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <form onSubmit={handleSubmit} className="p-6 bg-white/[0.02] border-t border-white/10">
-                <div className="flex items-center bg-black/40 border border-white/10 rounded-2xl p-2 group focus-within:border-white/30 transition-all">
-                  <input 
-                    type="text"
-                    placeholder="Submit a Request for Information (RFI)..."
-                    className="flex-1 bg-transparent border-none outline-none px-4 text-white placeholder-slate-600 text-sm"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    disabled={loading}
-                  />
-                  <button 
-                    type="submit"
-                    className="w-12 h-12 bg-white text-black rounded-xl flex items-center justify-center hover:bg-slate-200 transition-all shadow-lg"
-                    disabled={loading}
-                  >
-                    <i className="fas fa-paper-plane"></i>
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          {/* Right: Bulletin Board (Quick Preview) */}
-          <div className="lg:col-span-4 flex flex-col space-y-6">
-            <div className="glass-panel p-8 rounded-3xl h-full flex flex-col">
-              <h3 
-                className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-8 flex items-center cursor-pointer hover:text-white transition-colors group"
-                onClick={() => setViewMode('archive')}
-              >
-                <i className="fas fa-bullhorn mr-3 text-slate-600 group-hover:text-white transition-colors"></i>
-                Strategic Bulletins
-                <i className="fas fa-external-link-alt ml-auto text-[10px] opacity-40"></i>
-              </h3>
-              
-              <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
-                 {NOTICES.map((notice) => (
-                   <div 
-                    key={notice.id} 
-                    className="p-5 bg-white/5 border border-white/5 rounded-2xl hover:border-white/20 hover:bg-white/[0.07] transition-all cursor-pointer group"
-                    onClick={() => setSelectedNotice(notice)}
-                   >
-                      <div className="flex justify-between items-start mb-3">
-                         <span className={`text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded border ${
-                           notice.category === 'Urgent' ? 'text-rose-400 border-rose-900 bg-rose-950/20' :
-                           notice.category === 'Update' ? 'text-emerald-400 border-emerald-900 bg-emerald-950/20' :
-                           'text-slate-400 border-slate-800 bg-slate-900/40'
-                         }`}>
-                           {notice.category}
-                         </span>
-                         <span className="text-[10px] text-slate-600 font-mono">{notice.date}</span>
-                      </div>
-                      <h4 className="text-sm font-medium text-white mb-2 group-hover:text-slate-200">{notice.title}</h4>
-                      <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
-                        {notice.excerpt}
-                      </p>
-                      <div className="mt-4 pt-4 border-t border-white/5 flex items-center text-[9px] uppercase tracking-widest text-slate-600 group-hover:text-slate-400">
-                         <span>Read Full Bulletin</span>
-                         <i className="fas fa-arrow-right ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
-                      </div>
-                   </div>
-                 ))}
               </div>
             </div>
           </div>
@@ -262,10 +179,10 @@ const DecisionRoom: React.FC = () => {
                  <p className="text-xs text-slate-500 uppercase tracking-widest">Global Directives & Network Advisories</p>
                </div>
                <button 
-                 onClick={() => setViewMode('exchange')}
+                 onClick={() => setViewMode('bulletins')}
                  className="text-[10px] uppercase tracking-widest text-slate-500 hover:text-white transition-all flex items-center"
                >
-                 <i className="fas fa-arrow-left mr-2"></i> Back to Exchange
+                 <i className="fas fa-arrow-left mr-2"></i> Back to Bulletins
                </button>
             </div>
 
