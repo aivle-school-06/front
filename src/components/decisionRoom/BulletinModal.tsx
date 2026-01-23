@@ -1,0 +1,93 @@
+import React from 'react';
+import { Bulletin } from '../../types/decisionRoom';
+
+interface BulletinModalProps {
+  open: boolean;
+  bulletin: Bulletin | null;
+  onClose: () => void;
+}
+
+const tagStyles: Record<string, string> = {
+  URGENT: 'text-rose-300 border-rose-900 bg-rose-950/40',
+  UPDATE: 'text-emerald-300 border-emerald-900 bg-emerald-950/40',
+  ADVISORY: 'text-sky-300 border-sky-900 bg-sky-950/40',
+};
+
+const BulletinModal: React.FC<BulletinModalProps> = ({ open, bulletin, onClose }) => {
+  if (!open || !bulletin) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 md:p-16">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={onClose}></div>
+      <div className="relative glass-panel w-full max-w-3xl max-h-full overflow-y-auto rounded-3xl p-10 shadow-2xl animate-in zoom-in-95 duration-300">
+        <button
+          onClick={onClose}
+          className="absolute top-8 right-8 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all text-slate-400"
+        >
+          <i className="fas fa-times"></i>
+        </button>
+
+        <div className="mb-8">
+          <span
+            className={`text-[10px] font-bold uppercase tracking-[0.3em] px-3 py-1 rounded-full border mb-4 inline-block ${
+              tagStyles[bulletin.tag]
+            }`}
+          >
+            {bulletin.tag}
+          </span>
+          <h2 className="text-3xl md:text-4xl font-light serif text-white mb-4">
+            {bulletin.title}
+          </h2>
+          <div className="flex flex-wrap items-center text-[10px] text-slate-500 uppercase tracking-widest gap-4">
+            <span>
+              <i className="fas fa-calendar-alt mr-2"></i>
+              {bulletin.date}
+            </span>
+            <span>
+              <i className="fas fa-user-shield mr-2"></i>
+              {bulletin.issuedBy}
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-5 text-slate-300 leading-relaxed text-sm">
+          {bulletin.body.split('\n').map((line, index) => (
+            <p key={`${bulletin.id}-line-${index}`} className="text-slate-300">
+              {line}
+            </p>
+          ))}
+        </div>
+
+        <div className="mt-8 p-6 bg-white/5 border border-white/5 rounded-2xl">
+          <p className="text-xs text-slate-500 mb-4 uppercase tracking-widest">Attachments</p>
+          <div className="flex flex-col gap-2 text-sm text-slate-300">
+            {(bulletin.links ?? []).length === 0 && (
+              <span className="text-slate-500">첨부 문서가 없습니다.</span>
+            )}
+            {(bulletin.links ?? []).map((link) => (
+              <button
+                key={link.label}
+                type="button"
+                className="flex items-center justify-between px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/30 transition"
+              >
+                <span>{link.label}</span>
+                <i className="fas fa-external-link-alt text-xs text-slate-500"></i>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-10 flex justify-end">
+          <button
+            onClick={onClose}
+            className="bg-white text-black px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-slate-200 transition-all"
+          >
+            Acknowledge &amp; Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BulletinModal;
