@@ -237,7 +237,8 @@ const Landing: React.FC = () => {
         
         <div className="relative z-10 fade-up flex flex-col items-center mb-12">
           <button 
-            onClick={() => { setAuthMode('login'); setShowAuth(true); }}
+            //로그인 기능 스킵 onClick={() => { setAuthMode('login'); setShowAuth(true); }}
+            onClick={() => navigate('/dashboard')}
             className="btn-primary group !bg-white/10 !text-white !backdrop-blur-xl border border-white/20 px-12 py-5 hover:!bg-white hover:!text-black transition-all shadow-2xl"
           >
             <span className="text-xs uppercase tracking-[0.2em] font-bold">S E N T I N E L</span>
