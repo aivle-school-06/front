@@ -4,6 +4,7 @@ import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-ro
 import Dashboard from './pages/Dashboard';
 import Partners from './pages/Partners';
 import PartnerDetail from './pages/PartnerDetail';
+import InvitePartner from './pages/InvitePartner';
 import DecisionRoom from './pages/DecisionRoom';
 import Landing from './pages/Landing';
 
@@ -42,9 +43,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
         
         <nav className="flex-1">
-          <SidebarItem to="/dashboard" icon="fa-th-large" label="Dashboard" />
-          <SidebarItem to="/partners" icon="fa-handshake" label="Partners" />
-          <SidebarItem to="/decisions" icon="fa-balance-scale" label="Decision Room" />
+          <SidebarItem to="/dashboard" icon="fa-th-large" label="대시보드" />
+          <SidebarItem to="/partners" icon="fa-handshake" label="협력사" />
+          <SidebarItem to="/decisions" icon="fa-balance-scale" label="의사결정" />
         </nav>
 
         <div className="p-6 border-t border-white/5">
@@ -86,6 +87,7 @@ const App: React.FC = () => {
         {/* Fixed missing children property error by explicitly wrapping route elements within DashboardLayout */}
         <Route path="/dashboard" element={<DashboardLayout children={<Dashboard />} />} />
         <Route path="/partners" element={<DashboardLayout children={<Partners />} />} />
+        <Route path="/partners/invite" element={<DashboardLayout children={<InvitePartner />} />} />
         <Route path="/partners/:id" element={<DashboardLayout children={<PartnerDetail />} />} />
         <Route path="/decisions" element={<DashboardLayout children={<DecisionRoom />} />} />
       </Routes>
