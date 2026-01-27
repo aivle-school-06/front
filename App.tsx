@@ -7,6 +7,7 @@ import PartnerDetail from './pages/PartnerDetail';
 import InvitePartner from './pages/InvitePartner';
 import DecisionRoom from './pages/DecisionRoom';
 import Landing from './pages/Landing';
+import AddCompany from './pages/companies/add';
 
 const SidebarItem = ({ to, icon, label }: { to: string; icon: string; label: string }) => {
   const location = useLocation();
@@ -89,6 +90,7 @@ const App: React.FC = () => {
         <Route path="/partners" element={<DashboardLayout children={<Partners />} />} />
         <Route path="/partners/invite" element={<DashboardLayout children={<InvitePartner />} />} />
         <Route path="/partners/:id" element={<DashboardLayout children={<PartnerDetail />} />} />
+        <Route path="/companies/add" element={<DashboardLayout children={<AddCompany />} />} />
         <Route path="/decisions" element={<DashboardLayout children={<DecisionRoom />} />} />
       </Routes>
     </Router>
