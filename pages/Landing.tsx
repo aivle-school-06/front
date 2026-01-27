@@ -224,7 +224,7 @@ const Landing: React.FC = () => {
           <div className="relative w-full h-full overflow-hidden">
             <video
               className="absolute top-0 left-0 w-full h-full object-cover scale-105"
-              src="public/img/owl.mp4"
+              src="/img/owl.mp4"
               autoPlay
               muted
               loop
@@ -306,7 +306,7 @@ const Landing: React.FC = () => {
       <section className="py-32 px-10 border-t border-white/5">
          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
             <div className="relative aspect-[4/3] rounded-sm overflow-hidden bg-slate-900">
-               <img src="public/img/team.jpg" alt="팀 사진" className="w-full h-full object-cover translate-y-5 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all duration-1000" />
+               <img src="/img/team.jpg" alt="팀 사진" className="w-full h-full object-cover translate-y-5 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all duration-1000" />
                <div className="absolute inset-0 border-[20px] border-[#050505] pointer-events-none"></div>
             </div>
             <div>
@@ -346,7 +346,7 @@ const Landing: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                <div className="md:col-span-2 group cursor-pointer">
                   <div className="aspect-video bg-slate-900 overflow-hidden mb-8">
-                    <video src="public/img/robot.mp4" className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" alt="뉴스 1"
+                    <video src="/img/robot.mp4" className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" alt="뉴스 1"
                       autoPlay
                       muted
                       loop
@@ -379,7 +379,7 @@ const Landing: React.FC = () => {
       {/* Final CTA Area */}
       <section className="py-40 px-10 relative overflow-hidden flex flex-col items-center text-center">
          <div className="absolute inset-0 opacity-20 grayscale pointer-events-none">
-            <img src="public/img/robot.jpg" className="w-full h-full object-cover" />
+            <img src="/img/robot.jpg" className="w-full h-full object-cover" />
          </div>
          <div className="relative z-10 max-w-3xl">
             <h2 className="text-4xl md:text-5xl serif leading-tight mb-12">우리는 기업 네트워크의 불확실성을 <br/>데이터 인텔리전스로 <br/>선제적으로 해석합니다.</h2>
