@@ -28,26 +28,6 @@ const parseQuarter = (quarter: string) => {
   };
 };
 
-const getQuarterKey = (date: Date) => {
-  const year = date.getFullYear();
-  const quarter = Math.floor(date.getMonth() / 3) + 1;
-  return `${year}Q${quarter}`;
-};
-
-const buildTrailingYearQuarters = (endQuarter: string) => {
-  const { year, quarter } = parseQuarter(endQuarter);
-  const result: string[] = [];
-
-  for (let offset = 3; offset >= 0; offset -= 1) {
-    const index = quarter - offset;
-    const adjustedYear = year + Math.floor((index - 1) / 4);
-    const adjustedQuarter = ((index - 1 + 4) % 4) + 1;
-    result.push(`${adjustedYear}Q${adjustedQuarter}`);
-  }
-
-  return result;
-};
-
 const RiskStatusTrendChart: React.FC<RiskStatusTrendChartProps> = ({ records }) => {
   const chartData = useMemo(() => {
     if (records.length === 0) return [];
@@ -70,10 +50,7 @@ const RiskStatusTrendChart: React.FC<RiskStatusTrendChartProps> = ({ records }) 
       {},
     );
 
-    const visibleQuarters = buildTrailingYearQuarters(getQuarterKey(new Date()));
-
     return Object.keys(grouped)
-      .filter((quarter) => visibleQuarters.includes(quarter))
       .sort((a, b) => {
         const first = parseQuarter(a);
         const second = parseQuarter(b);
