@@ -5,11 +5,6 @@ export interface KpiValue {
   deltaPct?: number;
 }
 
-export interface KpiDaysValue {
-  value: number;
-  deltaDays?: number;
-}
-
 export type RiskIndexLabel = '최소' | '낮음' | '주의' | '높음';
 export type RiskIndexStatus = 'safe' | 'watch' | 'risk';
 
@@ -26,7 +21,6 @@ export interface NetworkHealthKpi {
 
 export interface DashboardKpis {
   activePartners: KpiValue;
-  decisionVelocityDays: KpiDaysValue;
   riskIndex: RiskIndexKpi;
   networkHealth: NetworkHealthKpi;
 }
@@ -50,6 +44,7 @@ export interface RiskDistribution {
 export interface KpiCard {
   label: string;
   valueText: string;
+  unit?: string;
   deltaText?: string;
   icon: string;
   tone?: 'positive' | 'negative' | 'neutral';
