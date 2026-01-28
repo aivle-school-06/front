@@ -5,7 +5,6 @@ const summaries: Record<DashboardRange, DashboardSummary> = {
     range: '7d',
     kpis: {
       activePartners: { value: 38, deltaPct: 3.2 },
-      decisionVelocityDays: { value: 3.6, deltaDays: -0.4 },
       riskIndex: { label: '낮음', status: 'safe', deltaText: '안정 유지' },
       networkHealth: { valuePct: 97.4, deltaPct: 0.6 },
     },
@@ -35,7 +34,6 @@ const summaries: Record<DashboardRange, DashboardSummary> = {
     range: '30d',
     kpis: {
       activePartners: { value: 124, deltaPct: 12.4 },
-      decisionVelocityDays: { value: 4.2, deltaDays: -0.5 },
       riskIndex: { label: '최소', status: 'safe', deltaText: '안정적' },
       networkHealth: { valuePct: 98.2, deltaPct: 0.4 },
     },
@@ -62,7 +60,6 @@ const summaries: Record<DashboardRange, DashboardSummary> = {
     range: '90d',
     kpis: {
       activePartners: { value: 301, deltaPct: 6.8 },
-      decisionVelocityDays: { value: 5.1, deltaDays: 0.3 },
       riskIndex: { label: '주의', status: 'watch', deltaText: '변동성 증가' },
       networkHealth: { valuePct: 94.9, deltaPct: -1.2 },
     },

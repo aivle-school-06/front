@@ -3,6 +3,7 @@ import DashboardHeader from '../components/dashboard/DashboardHeader';
 import KpiCards from '../components/dashboard/KpiCards';
 import PartnerTrendChart from '../components/dashboard/PartnerTrendChart';
 import RiskDistributionCard from '../components/dashboard/RiskDistributionCard';
+import { partnerRiskQuarterlyMock } from '../mocks/partnerRiskQuarterly.mock';
 import { fetchDashboardSummary } from '../services/dashboardApi';
 import { DashboardRange, DashboardSummary } from '../types/dashboard';
 
@@ -76,7 +77,7 @@ const DashboardPage: React.FC = () => {
 
       {!isLoading && !isError && data && (
         <div>
-          <KpiCards kpis={data.kpis} />
+          <KpiCards kpis={data.kpis} riskRecords={partnerRiskQuarterlyMock} />
 
           {emptyState && (
             <div className="glass-panel p-10 rounded-2xl text-center text-slate-400 mb-10">
