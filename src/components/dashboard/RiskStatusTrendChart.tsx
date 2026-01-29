@@ -54,15 +54,10 @@ const RiskStatusTrendChart: React.FC<RiskStatusTrendChartProps> = ({ records }) 
         return first.quarter - second.quarter;
       },
     );
-    const latestActualQuarter = sortedQuarters[sortedQuarters.length - 1];
+    const recentActualQuarters = sortedQuarters.slice(-4);
+    const latestActualQuarter = recentActualQuarters[recentActualQuarters.length - 1];
     const nextQuarter = shiftQuarter(latestActualQuarter, 1);
-    const quarterLabels = [
-      shiftQuarter(latestActualQuarter, -3),
-      shiftQuarter(latestActualQuarter, -2),
-      shiftQuarter(latestActualQuarter, -1),
-      latestActualQuarter,
-      nextQuarter,
-    ];
+    const quarterLabels = [...recentActualQuarters, nextQuarter];
 
     const visibleQuarters = new Set(quarterLabels);
 
