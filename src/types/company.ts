@@ -75,16 +75,24 @@ export interface CompanySignalItem {
   tooltip?: TooltipContent;
 }
 
-export interface ForecastPoint {
-  x: string;
-  y: number;
+export interface MetricForecastPoint {
+  quarter: string;
+  value: number;
   type: 'ACTUAL' | 'PRED';
+}
+
+export interface MetricSeries {
+  key: string;
+  label: string;
+  unit?: string | null;
+  points: MetricForecastPoint[];
 }
 
 export interface ForecastResponse {
   companyId: string;
-  horizon: string;
-  series: ForecastPoint[];
+  latestActualQuarter: string;
+  nextQuarter: string;
+  metricSeries: MetricSeries[];
   modelInfo?: {
     name?: string;
     updatedAt?: string;

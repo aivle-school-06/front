@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import AsyncState from '../components/common/AsyncState';
 import AiCommentaryCard from '../components/companyDetail/AiCommentaryCard';
-import ForecastChartPanel from '../components/companyDetail/ForecastChartPanel';
+import MetricForecastChartPanel from '../components/companyDetail/MetricForecastChartPanel';
 import MetricsPanel from '../components/companyDetail/MetricsPanel';
 import { fetchCompanyOverview } from '../services/companiesApi';
 import { CompanyOverview } from '../types/company';
 import {
   getCompanyStatusLabel,
-  toForecastChartData,
+  toMetricForecast,
   toMetricCards,
   toSignalCards,
 } from '../utils/companySelectors';
@@ -57,7 +57,7 @@ const CompanyDetailPage: React.FC = () => {
   }, [id]);
 
   const statusLabel = detail ? getCompanyStatusLabel(detail.company.riskLevel) : '—';
-  const forecastData = toForecastChartData(detail?.forecast);
+  const metricForecast = toMetricForecast(detail?.forecast);
   const metrics = toMetricCards(detail?.keyMetrics);
   const signals = toSignalCards(detail?.signals);
 
@@ -103,7 +103,7 @@ const CompanyDetailPage: React.FC = () => {
             </header>
 
             <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-              <ForecastChartPanel data={forecastData} />
+              <MetricForecastChartPanel metricForecast={metricForecast} />
               <MetricsPanel metrics={metrics} signals={signals} />
             </div>
 

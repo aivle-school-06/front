@@ -64,17 +64,48 @@ const BASE_TIMELINE: CompanyTimelineItem[] = [
 
 const makeForecast = (company: CompanySummary): ForecastResponse => ({
   companyId: company.id,
-  horizon: '6m',
-  series: [
-    { x: '1월', y: Math.max(20, company.overallScore - 8), type: 'ACTUAL' },
-    { x: '2월', y: Math.max(20, company.overallScore - 4), type: 'ACTUAL' },
-    { x: '3월', y: Math.max(20, company.overallScore - 2), type: 'ACTUAL' },
-    { x: '4월', y: Math.max(20, company.overallScore - 3), type: 'PRED' },
-    { x: '5월', y: company.overallScore, type: 'PRED' },
-    { x: '6월', y: Math.min(100, company.overallScore + 1), type: 'PRED' },
+  latestActualQuarter: '2025Q3',
+  nextQuarter: '2025Q4',
+  metricSeries: [
+    {
+      key: 'ROA',
+      label: 'ROA',
+      unit: '%',
+      points: [
+        { quarter: '2024Q4', value: Math.max(1, company.overallScore / 20 - 0.3), type: 'ACTUAL' },
+        { quarter: '2025Q1', value: Math.max(1, company.overallScore / 20 - 0.1), type: 'ACTUAL' },
+        { quarter: '2025Q2', value: Math.max(1, company.overallScore / 20 + 0.2), type: 'ACTUAL' },
+        { quarter: '2025Q3', value: Math.max(1, company.overallScore / 20 + 0.1), type: 'ACTUAL' },
+        { quarter: '2025Q4', value: Math.max(1, company.overallScore / 20 + 0.3), type: 'PRED' },
+      ],
+    },
+    {
+      key: 'CFO_MARGIN',
+      label: 'CFO/매출액 비율',
+      unit: '%',
+      points: [
+        { quarter: '2024Q4', value: Math.max(3, company.overallScore / 3), type: 'ACTUAL' },
+        { quarter: '2025Q1', value: Math.max(3, company.overallScore / 3 + 1), type: 'ACTUAL' },
+        { quarter: '2025Q2', value: Math.max(3, company.overallScore / 3 + 2), type: 'ACTUAL' },
+        { quarter: '2025Q3', value: Math.max(3, company.overallScore / 3 + 1), type: 'ACTUAL' },
+        { quarter: '2025Q4', value: Math.max(3, company.overallScore / 3 + 2), type: 'PRED' },
+      ],
+    },
+    {
+      key: 'EXT_REPUTATION_RISK',
+      label: '외부 평판 리스크',
+      unit: '점',
+      points: [
+        { quarter: '2024Q4', value: Math.min(100, company.overallScore + 6), type: 'ACTUAL' },
+        { quarter: '2025Q1', value: Math.min(100, company.overallScore + 4), type: 'ACTUAL' },
+        { quarter: '2025Q2', value: Math.min(100, company.overallScore + 2), type: 'ACTUAL' },
+        { quarter: '2025Q3', value: Math.min(100, company.overallScore + 3), type: 'ACTUAL' },
+        { quarter: '2025Q4', value: Math.min(100, company.overallScore + 1), type: 'PRED' },
+      ],
+    },
   ],
   modelInfo: {
-    name: 'Sentinel Forecast v1',
+    name: 'Sentinel Indicator Prediction v1',
     updatedAt: '2024-11-01',
   },
 });

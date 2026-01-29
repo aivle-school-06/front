@@ -3,6 +3,7 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -28,11 +29,40 @@ const parseQuarter = (quarter: string) => {
   };
 };
 
+const formatQuarterLabel = (quarter: string, isForecast: boolean) =>
+  `${quarter}${isForecast ? '(예측)' : ''}`;
+
+const shiftQuarter = (quarter: string, delta: number) => {
+  const parsed = parseQuarter(quarter);
+  const total = parsed.year * 4 + (parsed.quarter - 1) + delta;
+  const year = Math.floor(total / 4);
+  const quarterIndex = total % 4;
+  return `${year}Q${quarterIndex + 1}`;
+};
+
 const RiskStatusTrendChart: React.FC<RiskStatusTrendChartProps> = ({ records }) => {
-  const chartData = useMemo(() => {
+  const riskStatusDistributionTrend = useMemo(() => {
     if (records.length === 0) return [];
 
-    const visibleQuarters = new Set(['2025Q1', '2025Q2', '2025Q3', '2025Q4', '2026Q1']);
+    const sortedQuarters = Array.from(new Set(records.map((record) => record.quarter))).sort(
+      (a, b) => {
+        const first = parseQuarter(a);
+        const second = parseQuarter(b);
+        if (first.year !== second.year) return first.year - second.year;
+        return first.quarter - second.quarter;
+      },
+    );
+    const latestActualQuarter = sortedQuarters[sortedQuarters.length - 1];
+    const nextQuarter = shiftQuarter(latestActualQuarter, 1);
+    const quarterLabels = [
+      shiftQuarter(latestActualQuarter, -3),
+      shiftQuarter(latestActualQuarter, -2),
+      shiftQuarter(latestActualQuarter, -1),
+      latestActualQuarter,
+      nextQuarter,
+    ];
+
+    const visibleQuarters = new Set(quarterLabels);
 
     const grouped = records.reduce<Record<string, { min: number; warn: number; risk: number; total: number }>>(
       (acc, record) => {
@@ -55,25 +85,42 @@ const RiskStatusTrendChart: React.FC<RiskStatusTrendChartProps> = ({ records }) 
       {},
     );
 
-    return Object.keys(grouped)
-      .sort((a, b) => {
-        const first = parseQuarter(a);
-        const second = parseQuarter(b);
-        if (first.year !== second.year) return first.year - second.year;
-        return first.quarter - second.quarter;
-      })
-      .map((quarter) => {
-        const { min, warn, risk, total } = grouped[quarter];
+    const latestActualBucket = grouped[latestActualQuarter] ?? { min: 0, warn: 0, risk: 0, total: 0 };
+    const latestActualRates = {
+      minRate: latestActualBucket.total ? (latestActualBucket.min / latestActualBucket.total) * 100 : 0,
+      warnRate: latestActualBucket.total ? (latestActualBucket.warn / latestActualBucket.total) * 100 : 0,
+      riskRate: latestActualBucket.total ? (latestActualBucket.risk / latestActualBucket.total) * 100 : 0,
+    };
+
+    return quarterLabels.map((quarter) => {
+      if (quarter === nextQuarter) {
         return {
           quarter,
-          minRate: total ? (min / total) * 100 : 0,
-          warnRate: total ? (warn / total) * 100 : 0,
-          riskRate: total ? (risk / total) * 100 : 0,
+          ...latestActualRates,
+          isForecast: true,
+          latestActualQuarter,
+          nextQuarter,
         };
-      });
+      }
+
+      const { min, warn, risk, total } = grouped[quarter] ?? { min: 0, warn: 0, risk: 0, total: 0 };
+      return {
+        quarter,
+        minRate: total ? (min / total) * 100 : 0,
+        warnRate: total ? (warn / total) * 100 : 0,
+        riskRate: total ? (risk / total) * 100 : 0,
+        isForecast: false,
+        latestActualQuarter,
+        nextQuarter,
+      };
+    });
   }, [records]);
 
-  const hasData = chartData.length > 0;
+  const riskStatusOverTime = riskStatusDistributionTrend;
+  const latestActualQuarter = riskStatusDistributionTrend[0]?.latestActualQuarter ?? '';
+  const nextQuarter = riskStatusDistributionTrend[0]?.nextQuarter ?? '';
+  const quarterLabels = riskStatusDistributionTrend.map((item) => item.quarter);
+  const hasData = riskStatusDistributionTrend.length > 0;
 
   return (
     <div className="lg:col-span-2 glass-panel p-8 rounded-2xl">
@@ -96,17 +143,21 @@ const RiskStatusTrendChart: React.FC<RiskStatusTrendChartProps> = ({ records }) 
               <span className="w-3 h-3 bg-rose-500/80 rounded-full"></span>
               <span>위험</span>
             </div>
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full border border-slate-400/60"></span>
+              <span>{nextQuarter ? `${nextQuarter}(예측)` : '예측'}</span>
+            </div>
           </div>
         </div>
         <p className="text-xs text-slate-500">
           분기별 협력사 위험 상태 비중 변화를 보여줍니다. ‘주의/위험’ 영역이 확대될수록 포트폴리오
-          전반의 리스크가 증가하고 있음을 의미합니다.
+          전반의 리스크가 증가하고 있음을 의미합니다. 마지막 분기는 예측 구간입니다.
         </p>
       </div>
       <div className="h-64">
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
+            <AreaChart data={riskStatusOverTime}>
               <defs>
                 <linearGradient id="minFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#34d399" stopOpacity={0.6} />
@@ -122,7 +173,14 @@ const RiskStatusTrendChart: React.FC<RiskStatusTrendChartProps> = ({ records }) 
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-              <XAxis dataKey="quarter" stroke="#64748b" fontSize={10} axisLine={false} tickLine={false} />
+              <XAxis
+                dataKey="quarter"
+                stroke="#64748b"
+                fontSize={10}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(value: string) => formatQuarterLabel(value, value === nextQuarter)}
+              />
               <YAxis
                 domain={[0, 100]}
                 tickFormatter={(value) => `${value}%`}
@@ -132,7 +190,11 @@ const RiskStatusTrendChart: React.FC<RiskStatusTrendChartProps> = ({ records }) 
                 tickLine={false}
               />
               <Tooltip
-                formatter={(value, name) => [`${Number(value).toFixed(1)}%`, labelMap[String(name)] ?? name]}
+                formatter={(value, name, payload) => {
+                  const isForecast = payload?.payload?.quarter === nextQuarter;
+                  const quarterLabel = formatQuarterLabel(payload?.payload?.quarter ?? '', isForecast);
+                  return [`${Number(value).toFixed(1)}%`, `${labelMap[String(name)] ?? name} · ${quarterLabel}`];
+                }}
                 contentStyle={{
                   backgroundColor: '#0f172a',
                   border: '1px solid rgba(255,255,255,0.1)',
@@ -140,6 +202,14 @@ const RiskStatusTrendChart: React.FC<RiskStatusTrendChartProps> = ({ records }) 
                   fontSize: '12px',
                 }}
               />
+              {nextQuarter && (
+                <ReferenceLine
+                  x={nextQuarter}
+                  stroke="#94a3b8"
+                  strokeDasharray="4 4"
+                  label={{ value: '예측', position: 'insideTopRight', fill: '#94a3b8', fontSize: 10 }}
+                />
+              )}
               <Area
                 type="monotone"
                 dataKey="minRate"
@@ -175,7 +245,8 @@ const RiskStatusTrendChart: React.FC<RiskStatusTrendChartProps> = ({ records }) 
       </div>
       <p className="text-xs text-slate-500 mt-6">
         주의·위험 비중이 급증한 분기는 외부 환경 변화나 특정 산업/협력사 그룹의 이상 여부를 함께
-        점검하세요.
+        점검하세요. 우리는 기업 성과를 예측하는 서비스가 아니라, 리스크 상태 분포와 재무/리스크 지표의
+        변화를 예측·감시하는 서비스입니다.
       </p>
     </div>
   );

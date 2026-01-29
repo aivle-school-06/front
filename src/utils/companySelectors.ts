@@ -43,9 +43,17 @@ export const formatCompanyRevenue = (value: number): string => {
   return `${value.toLocaleString('ko-KR')}억`;
 };
 
-export const toForecastChartData = (forecast?: ForecastResponse) => {
-  if (!forecast) return [];
-  return forecast.series.map((point) => ({ month: point.x, score: point.y }));
+export const toMetricForecast = (forecast?: ForecastResponse) => {
+  if (!forecast) {
+    return {
+      latestActualQuarter: '',
+      nextQuarter: '',
+      metricSeries: [],
+      modelInfo: undefined,
+      companyId: '',
+    };
+  }
+  return forecast;
 };
 
 export const toMetricCards = (metrics?: MetricItem[]) => {
