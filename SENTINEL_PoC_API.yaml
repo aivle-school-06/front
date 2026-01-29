@@ -23,8 +23,83 @@ tags:
     description: Company search, registration, and risk analysis
   - name: UpdateRequests
     description: User-to-admin update request handling
+  - name: Auth
+    description: Authentication (JWT)
+
 
 paths:
+/auth/login:
+  post:
+      tags: [Auth]
+      summary: Login (JWT)
+      description: >
+        Authenticate user and return JWT access token.
+        In PoC, access token is used for API authorization (Bearer).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              example:
+                value:
+                  email: user@company.com
+                  password: "password123!"
+      responses:
+        '200':
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'  
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout
+      description: >
+        PoC logout endpoint. Client should delete stored tokens locally.
+        Server may treat this as a no-op and return 204.
+        (If later you add refresh-token or token revocation, implement it here.)
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Logout success (no content)
+        '401':
+          description: Unauthorized (missing/invalid token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user
+      description: Returns current user profile using access token.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+        '401':
+          description: Unauthorized (missing/invalid token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 
   /dashboard/summary:
     get:

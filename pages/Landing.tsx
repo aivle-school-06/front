@@ -216,7 +216,12 @@ const Landing: React.FC = () => {
               {authMode === 'register' && (
                 <TurnstileWidget
                   className="mt-2"
-                  onVerify={handleTurnstileVerify}
+                  onVerify={(token) => {
+                    setTurnstileToken(token);
+                    if (token) {
+                      setAuthError(null);
+                    }
+                  }}
                 />
               )}
 
