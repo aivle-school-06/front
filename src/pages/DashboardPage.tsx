@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
 import KpiCards from '../components/dashboard/KpiCards';
-import RiskStatusTrendChart from '../components/dashboard/RiskStatusTrendChart';
+import RiskStatusTrendCard from '../features/dashboard/risk-status-trend/RiskStatusTrendCard';
 import RiskDistributionCard from '../components/dashboard/RiskDistributionCard';
 import { companyRiskQuarterlyMock } from '../mocks/companyRiskQuarterly.mock';
 import { getMockRiskDistribution } from '../mocks/riskDistribution.mock';
@@ -118,10 +118,7 @@ const DashboardPage: React.FC = () => {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <RiskStatusTrendChart
-              windowQuarters={data.windowQuarters}
-              trend={data.riskStatusDistributionTrend}
-            />
+            <RiskStatusTrendCard />
             <RiskDistributionCard distribution={riskDistribution} />
           </div>
         </div>
