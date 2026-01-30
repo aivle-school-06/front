@@ -58,11 +58,23 @@ export const toMetricForecast = (forecast?: ForecastResponse) => {
 
 export const toMetricCards = (metrics?: MetricItem[]) => {
   if (!metrics) return [];
-  return metrics.map((metric) => ({
-    label: metric.label,
-    value: `${metric.value}${metric.unit ?? ''}`,
-    tooltip: metric.tooltip as KpiTooltipContent | undefined,
-  }));
+  return metrics.map((metric) => {
+    if (metric.value === null || metric.value === undefined) {
+      return {
+        label: metric.label,
+        value: '—',
+        tooltip: {
+          description: '데이터 수집중입니다.',
+        } satisfies KpiTooltipContent,
+      };
+    }
+
+    return {
+      label: metric.label,
+      value: `${metric.value}${metric.unit ?? ''}`,
+      tooltip: metric.tooltip as KpiTooltipContent | undefined,
+    };
+  });
 };
 
 const toTrafficStatus = (status: 'GOOD' | 'WARN' | 'RISK'): TrafficLight => {

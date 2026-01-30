@@ -10,9 +10,11 @@ import {
   YAxis,
 } from 'recharts';
 import { ForecastResponse, MetricSeries } from '../../types/company';
+import AiCommentaryCard from './AiCommentaryCard';
 
 interface MetricForecastChartPanelProps {
   metricForecast: ForecastResponse;
+  commentary: string;
 }
 
 const parseQuarter = (quarter: string) => {
@@ -31,7 +33,10 @@ const shiftQuarter = (quarter: string, delta: number) => {
   return `${year}Q${quarterIndex + 1}`;
 };
 
-const MetricForecastChartPanel: React.FC<MetricForecastChartPanelProps> = ({ metricForecast }) => {
+const MetricForecastChartPanel: React.FC<MetricForecastChartPanelProps> = ({
+  metricForecast,
+  commentary,
+}) => {
   const { latestActualQuarter, nextQuarter, metricSeries } = metricForecast;
   const [selectedMetricKey, setSelectedMetricKey] = useState<string>(
     metricSeries[0]?.key ?? '',
@@ -84,8 +89,8 @@ const MetricForecastChartPanel: React.FC<MetricForecastChartPanelProps> = ({ met
   const forecastLabel = nextQuarter ? `${nextQuarter}(예측)` : '예측';
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_0_40px_rgba(59,130,246,0.12)]">
-      <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_0_40px_rgba(59,130,246,0.12)] flex flex-col gap-6">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h3 className="text-lg text-white">지표 예측 그래프</h3>
           <p className="text-xs text-slate-500">
@@ -107,7 +112,7 @@ const MetricForecastChartPanel: React.FC<MetricForecastChartPanelProps> = ({ met
           </select>
         </div>
       </div>
-      <div className="h-72">
+      <div className="h-[220px] min-h-[220px] sm:h-[240px] sm:min-h-[240px] lg:h-[260px] lg:min-h-[260px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={quarterlyMetricTrend}>
             <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
@@ -181,6 +186,10 @@ const MetricForecastChartPanel: React.FC<MetricForecastChartPanelProps> = ({ met
           </LineChart>
         </ResponsiveContainer>
       </div>
+      <AiCommentaryCard
+        commentary={commentary}
+        variant="embedded"
+      />
     </div>
   );
 };

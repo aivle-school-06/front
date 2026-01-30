@@ -15,7 +15,7 @@ export const INITIAL_COMPANIES: CompanySummary[] = [
     overallScore: 92,
     riskLevel: 'SAFE',
     lastUpdatedAt: '2024-11-01',
-    kpi: { networkHealth: 92, annualRevenue: 4200, contractProgress: 84 },
+    kpi: { networkHealth: 92, annualRevenue: 4200, reputationScore: 92 },
   },
   {
     id: 'c-002',
@@ -24,7 +24,7 @@ export const INITIAL_COMPANIES: CompanySummary[] = [
     overallScore: 88,
     riskLevel: 'SAFE',
     lastUpdatedAt: '2024-11-02',
-    kpi: { networkHealth: 88, annualRevenue: 1800, contractProgress: 79 },
+    kpi: { networkHealth: 88, annualRevenue: 1800, reputationScore: 89 },
   },
   {
     id: 'c-003',
@@ -33,7 +33,7 @@ export const INITIAL_COMPANIES: CompanySummary[] = [
     overallScore: 45,
     riskLevel: 'RISK',
     lastUpdatedAt: '2024-10-28',
-    kpi: { networkHealth: 45, annualRevenue: 900, contractProgress: 58 },
+    kpi: { networkHealth: 45, annualRevenue: 900, reputationScore: 54 },
   },
   {
     id: 'c-004',
@@ -42,7 +42,7 @@ export const INITIAL_COMPANIES: CompanySummary[] = [
     overallScore: 78,
     riskLevel: 'SAFE',
     lastUpdatedAt: '2024-10-30',
-    kpi: { networkHealth: 78, annualRevenue: 12500, contractProgress: 88 },
+    kpi: { networkHealth: 78, annualRevenue: 12500, reputationScore: 86 },
   },
   {
     id: 'c-005',
@@ -51,7 +51,7 @@ export const INITIAL_COMPANIES: CompanySummary[] = [
     overallScore: 62,
     riskLevel: 'WARN',
     lastUpdatedAt: '2024-11-03',
-    kpi: { networkHealth: 62, annualRevenue: 2100, contractProgress: 71 },
+    kpi: { networkHealth: 62, annualRevenue: 2100, reputationScore: 68 },
   },
 ];
 
@@ -134,14 +134,15 @@ const makeKeyMetrics = (company: CompanySummary): MetricItem[] => [
     },
   },
   {
-    key: 'CONTRACT_PROGRESS',
-    label: '계약 진행률',
-    value: company.kpi?.contractProgress ?? 0,
-    unit: '%',
+    key: 'EXTERNAL_REPUTATION',
+    label: '외부 기업 평판',
+    value: company.kpi?.reputationScore ?? null,
+    unit: '점',
     tooltip: {
-      description: '체결 계약 대비 정상 이행 비율입니다.',
-      interpretation: '하락은 운영 리스크 신호일 수 있습니다.',
-      actionHint: '지연 원인을 항목별로 점검하세요.',
+      description:
+        '외부 뉴스·커뮤니티·공시 텍스트 등 비정형 데이터를 분석해 평판 점수를 산출합니다.',
+      interpretation: '최근 30일 언급량과 감성을 종합한 지표입니다.',
+      actionHint: '부정 키워드 급증 시 커뮤니케이션 전략을 점검하세요.',
     },
   },
 ];
@@ -217,7 +218,7 @@ const COMPANY_COMMENTS: Record<string, string> = {
   'c-003':
     '바이오넥스는 현금 유동성 지표가 급감하고 있어 단기적인 리스크 대응이 필요합니다.\n핵심 파트너와의 계약 안정성 점검을 권장합니다.',
   'c-004':
-    '한빛기공은 매출과 계약 진행률이 견조하게 유지되고 있습니다.\n신규 설비 투자 계획에 따른 재무 레버리지 변화를 모니터링하세요.',
+    '한빛기공은 매출과 외부 평판 점수가 안정적으로 유지되고 있습니다.\n신규 설비 투자 계획에 따른 재무 레버리지 변화를 모니터링하세요.',
   'c-005':
     '솔라젠에너지는 프로젝트 일정 지연으로 운영 리스크가 확대되고 있습니다.\n공급망 리스크를 세부적으로 점검할 필요가 있습니다.',
 };

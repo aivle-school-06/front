@@ -37,7 +37,7 @@ export interface KpiCardDto {
 export interface CompanyKpiMini {
   networkHealth?: number;
   annualRevenue?: number;
-  contractProgress?: number;
+  reputationScore?: number;
 }
 
 export interface CompanySummary {
@@ -102,7 +102,7 @@ export interface ForecastResponse {
 export interface MetricItem {
   key: string;
   label: string;
-  value: number;
+  value: number | null;
   unit?: string | null;
   delta?: DeltaValue;
   tooltip?: TooltipContent;

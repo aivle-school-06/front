@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import AsyncState from '../components/common/AsyncState';
-import AiCommentaryCard from '../components/companyDetail/AiCommentaryCard';
 import MetricForecastChartPanel from '../components/companyDetail/MetricForecastChartPanel';
 import MetricsPanel from '../components/companyDetail/MetricsPanel';
 import { fetchCompanyOverview } from '../services/companiesApi';
@@ -103,11 +102,12 @@ const CompanyDetailPage: React.FC = () => {
             </header>
 
             <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-              <MetricForecastChartPanel metricForecast={metricForecast} />
+              <MetricForecastChartPanel
+                metricForecast={metricForecast}
+                commentary={detail.aiComment ?? ''}
+              />
               <MetricsPanel metrics={metrics} signals={signals} />
             </div>
-
-            <AiCommentaryCard commentary={detail.aiComment ?? ''} />
           </>
         )}
       </AsyncState>
