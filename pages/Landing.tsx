@@ -12,6 +12,7 @@ const Landing: React.FC = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [authError, setAuthError] = useState<string | null>(null);
+  const [duplicateEmailError, setDuplicateEmailError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
@@ -70,6 +71,7 @@ const Landing: React.FC = () => {
 
     setErrors(nextErrors);
     setAuthError(null);
+    setDuplicateEmailError(null);
 
     if (Object.keys(nextErrors).length > 0) {
       return;
@@ -103,6 +105,7 @@ const Landing: React.FC = () => {
           /already.*email/i.test(message));
 
       if (isDuplicateEmail) {
+        setDuplicateEmailError('\\uC911\\uBCF5\\uB41C \\uC774\\uBA54\\uC77C\\uC785\\uB2C8\\uB2E4.');
         setAuthError('중복된 이메일입니다.');
         setTurnstileToken('');
         setTurnstileResetKey(prev => prev + 1);
@@ -118,6 +121,7 @@ const Landing: React.FC = () => {
     setAuthMode(prev => prev === 'login' ? 'register' : 'login');
     setErrors({});
     setAuthError(null);
+    setDuplicateEmailError(null);
     setConfirmPassword('');
     setTurnstileToken('');
   };
@@ -185,13 +189,16 @@ const Landing: React.FC = () => {
                   type="email" 
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); setDuplicateEmailError(null); }}
                   placeholder="이메일을 입력해 주세요"
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-white/30 transition-all outline-none text-white placeholder-slate-700"
                   aria-invalid={Boolean(errors.email)}
                 />
                 {errors.email && (
                   <p className="text-xs text-red-400">{errors.email}</p>
+                )}
+                {duplicateEmailError && (
+                  <div className="mt-2 rounded-lg bg-red-500 text-black text-xs px-3 py-2">{duplicateEmailError}</div>
                 )}
               </div>
 
