@@ -107,14 +107,15 @@ const isApiResponse = (payload: unknown): payload is ApiResponse<unknown> => {
   );
 };
 
-const unwrapApiResponse = <T>(payload: unknown): T => {
-  if (!isApiResponse(payload)) {
-    throw new Error('Invalid API response format');
-  }
-
+const unwrapApiResponse = <T>(
+  payload: ApiResponse<T>
+): T => {
   if (!payload.success || payload.error) {
     const message =
-      typeof payload.error?.message === 'string' ? payload.error.message : 'API request failed';
+      typeof payload.error?.message === 'string'
+        ? payload.error.message
+        : 'API request failed';
+
     throw new ApiRequestError(message, payload.error ?? undefined);
   }
 
