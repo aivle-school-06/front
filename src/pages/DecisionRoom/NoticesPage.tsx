@@ -3,37 +3,143 @@ import BulletinGrid from '../../components/decisionRoom/BulletinGrid';
 import BulletinModal from '../../components/decisionRoom/BulletinModal';
 import AsyncState from '../../components/common/AsyncState';
 import { Bulletin } from '../../types/decisionRoom';
-import { fetchBulletins } from '../../services/decisionRoomApi';
+import { createPost, deletePost, listPosts, updatePost } from '../../api/posts';
+import { PostItem } from '../../types/post';
+import { getStoredUser } from '../../services/auth';
 
 const NoticesPage: React.FC = () => {
+  const currentUser = getStoredUser();
+  const role = currentUser?.role;
+  const isAdmin = role === 'ADMIN' || role === 'ROLE_ADMIN';
   const [noticeMode, setNoticeMode] = useState<'active' | 'archive'>('active');
-  const [notices, setNotices] = useState<Bulletin[]>([]);
+  const [posts, setPosts] = useState<PostItem[]>([]);
   const [selectedNoticeId, setSelectedNoticeId] = useState<string | null>(null);
   const [isLoadingNotices, setIsLoadingNotices] = useState<boolean>(false);
   const [errorNotices, setErrorNotices] = useState<string | null>(null);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<PostItem | null>(null);
+  const [editorTitle, setEditorTitle] = useState('');
+  const [editorContent, setEditorContent] = useState('');
+  const [editorError, setEditorError] = useState<string | null>(null);
 
   const loadNotices = useCallback(async () => {
     setIsLoadingNotices(true);
     setErrorNotices(null);
 
     try {
-      const response = await fetchBulletins(noticeMode);
-      setNotices(response);
+      const response = await listPosts({
+        page: 1,
+        size: 50,
+        sortBy: 'createdAt',
+        direction: 'DESC',
+      });
+      setPosts(response.content);
     } catch (error) {
       setErrorNotices('공지 데이터를 불러오는 중 문제가 발생했습니다.');
     } finally {
       setIsLoadingNotices(false);
     }
-  }, [noticeMode]);
+  }, []);
 
   useEffect(() => {
     loadNotices();
   }, [loadNotices]);
 
+  const filteredPosts = useMemo(() => {
+    if (noticeMode === 'active') {
+      return posts.filter((post) => post.status === 'ACTIVE');
+    }
+    return posts.filter((post) => post.status !== 'ACTIVE');
+  }, [noticeMode, posts]);
+
+  const mapPostToBulletin = useCallback((post: PostItem): Bulletin => {
+    const summary =
+      post.content.length > 140 ? `${post.content.slice(0, 140)}...` : post.content;
+    return {
+      id: String(post.id),
+      title: post.title,
+      summary,
+      body: post.content,
+      tag: post.isPinned ? 'URGENT' : 'UPDATE',
+      issuedBy: `User ${post.userId}`,
+      date: post.createdAt,
+      links: [],
+    };
+  }, []);
+
+  const notices = useMemo(
+    () => filteredPosts.map(mapPostToBulletin),
+    [filteredPosts, mapPostToBulletin]
+  );
+
   const selectedNotice = useMemo(
     () => notices.find((notice) => notice.id === selectedNoticeId) ?? null,
     [notices, selectedNoticeId]
   );
+
+  const handleOpenCreate = () => {
+    setEditingPost(null);
+    setEditorTitle('');
+    setEditorContent('');
+    setEditorError(null);
+    setEditorOpen(true);
+  };
+
+  const handleOpenEdit = () => {
+    if (!selectedNoticeId) return;
+    const post = posts.find((item) => String(item.id) === selectedNoticeId);
+    if (!post) return;
+    setEditingPost(post);
+    setEditorTitle(post.title);
+    setEditorContent(post.content);
+    setEditorError(null);
+    setEditorOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!editorTitle.trim() || !editorContent.trim()) {
+      setEditorError('제목과 내용을 모두 입력해 주세요.');
+      return;
+    }
+    setEditorError(null);
+
+    try {
+      if (editingPost) {
+        const updated = await updatePost(editingPost.id, {
+          categoryId: editingPost.categoryId,
+          title: editorTitle.trim(),
+          content: editorContent.trim(),
+        });
+        setPosts((prev) =>
+          prev.map((item) => (item.id === updated.id ? updated : item))
+        );
+        setSelectedNoticeId(String(updated.id));
+      } else {
+        const created = await createPost({
+          categoryId: 1,
+          title: editorTitle.trim(),
+          content: editorContent.trim(),
+        });
+        setPosts((prev) => [created, ...prev]);
+        setSelectedNoticeId(String(created.id));
+      }
+      setEditorOpen(false);
+    } catch (error) {
+      setEditorError('저장 중 문제가 발생했습니다.');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedNoticeId) return;
+    if (!window.confirm('이 공지를 삭제하시겠습니까?')) return;
+    try {
+      await deletePost(selectedNoticeId);
+      setPosts((prev) => prev.filter((item) => String(item.id) !== selectedNoticeId));
+      setSelectedNoticeId(null);
+    } catch (error) {
+      setErrorNotices('삭제 중 문제가 발생했습니다.');
+    }
+  };
 
   return (
     <div className="animate-in fade-in duration-700 space-y-8">
@@ -42,29 +148,40 @@ const NoticesPage: React.FC = () => {
           <h2 className="text-4xl font-light serif text-white mb-2">Decision Room Notices</h2>
           <p className="text-slate-400">Official company notices.</p>
         </div>
-        <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
-          <button
-            type="button"
-            onClick={() => setNoticeMode('active')}
-            className={`px-4 py-1.5 text-[9px] uppercase tracking-[0.3em] font-semibold rounded-full transition-all ${
-              noticeMode === 'active'
-                ? 'bg-white text-black shadow-[0_0_16px_rgba(255,255,255,0.15)]'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Notices
-          </button>
-          <button
-            type="button"
-            onClick={() => setNoticeMode('archive')}
-            className={`px-4 py-1.5 text-[9px] uppercase tracking-[0.3em] font-semibold rounded-full transition-all ${
-              noticeMode === 'archive'
-                ? 'bg-white text-black shadow-[0_0_16px_rgba(255,255,255,0.15)]'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Notice Archive
-          </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
+            <button
+              type="button"
+              onClick={() => setNoticeMode('active')}
+              className={`px-4 py-1.5 text-[9px] uppercase tracking-[0.3em] font-semibold rounded-full transition-all ${
+                noticeMode === 'active'
+                  ? 'bg-white text-black shadow-[0_0_16px_rgba(255,255,255,0.15)]'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Notices
+            </button>
+            <button
+              type="button"
+              onClick={() => setNoticeMode('archive')}
+              className={`px-4 py-1.5 text-[9px] uppercase tracking-[0.3em] font-semibold rounded-full transition-all ${
+                noticeMode === 'archive'
+                  ? 'bg-white text-black shadow-[0_0_16px_rgba(255,255,255,0.15)]'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Notice Archive
+            </button>
+          </div>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={handleOpenCreate}
+              className="px-5 py-2 rounded-full bg-white text-black text-[10px] uppercase tracking-[0.3em] font-semibold hover:bg-slate-200 transition"
+            >
+              새 공지
+            </button>
+          )}
         </div>
       </header>
 
@@ -99,6 +216,85 @@ const NoticesPage: React.FC = () => {
         bulletin={selectedNotice}
         onClose={() => setSelectedNoticeId(null)}
       />
+
+      {editorOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 md:p-16">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+            onClick={() => setEditorOpen(false)}
+          ></div>
+          <div className="relative glass-panel w-full max-w-2xl rounded-3xl p-10 shadow-2xl animate-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setEditorOpen(false)}
+              className="absolute top-8 right-8 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all text-slate-400"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+
+            <h3 className="text-2xl font-light serif text-white mb-6">
+              {editingPost ? '공지 수정' : '새 공지 작성'}
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-[10px] uppercase tracking-[0.3em] text-slate-500">제목</label>
+                <input
+                  value={editorTitle}
+                  onChange={(event) => setEditorTitle(event.target.value)}
+                  className="mt-2 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  placeholder="공지 제목을 입력하세요."
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-[0.3em] text-slate-500">내용</label>
+                <textarea
+                  value={editorContent}
+                  onChange={(event) => setEditorContent(event.target.value)}
+                  className="mt-2 w-full min-h-[200px] bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  placeholder="공지 내용을 입력하세요."
+                />
+              </div>
+              {editorError && <p className="text-xs text-rose-400">{editorError}</p>}
+            </div>
+
+            <div className="mt-8 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setEditorOpen(false)}
+                className="px-5 py-2 rounded-full border border-white/10 text-xs uppercase tracking-[0.3em] text-slate-300 hover:bg-white/5 transition"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                className="px-5 py-2 rounded-full bg-white text-black text-xs uppercase tracking-[0.3em] font-semibold hover:bg-slate-200 transition"
+              >
+                저장
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAdmin && selectedNotice && (
+        <div className="fixed bottom-8 right-10 z-[90] flex gap-2">
+          <button
+            type="button"
+            onClick={handleOpenEdit}
+            className="px-4 py-2 rounded-full bg-white/10 border border-white/20 text-[10px] uppercase tracking-[0.3em] text-white hover:bg-white/20 transition"
+          >
+            수정
+          </button>
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="px-4 py-2 rounded-full bg-rose-500/20 border border-rose-500/40 text-[10px] uppercase tracking-[0.3em] text-rose-200 hover:bg-rose-500/30 transition"
+          >
+            삭제
+          </button>
+        </div>
+      )}
     </div>
   );
 };
