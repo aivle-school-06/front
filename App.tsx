@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Companies from './pages/Companies';
 import CompanyDetail from './pages/CompanyDetail';
 import QnaPage from './pages/DecisionRoom/QnaPage';
+import NoticesPage from './pages/DecisionRoom/NoticesPage';
 import Landing from './pages/Landing';
 import AddCompany from './pages/companies/add';
 import VerifyEmail from './pages/auth/VerifyEmail';
@@ -51,7 +52,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <nav className="flex-1">
           <SidebarItem to="/dashboard" icon="fa-th-large" label="대시보드" />
           <SidebarItem to="/companies" icon="fa-handshake" label="협력사" />
-          <SidebarItem to="/decision-room/qna" icon="fa-balance-scale" label="의사결정" />
+          <SidebarItem to="/decision-room/notices" icon="fa-bell" label="공지사항" />
+          <SidebarItem to="/decision-room/qna" icon="fa-comments" label="Q&A" />
         </nav>
 
         <div className="p-6 border-t border-white/5">
@@ -92,6 +94,7 @@ const App: React.FC = () => {
         <Route path="/companies" element={<DashboardLayout children={<Companies />} />} />
         <Route path="/companies/:id" element={<DashboardLayout children={<CompanyDetail />} />} />
         <Route path="/companies/add" element={<DashboardLayout children={<AddCompany />} />} />
+        <Route path="/decision-room/notices" element={<DashboardLayout children={<NoticesPage />} />} />
         <Route path="/decision-room/qna" element={<DashboardLayout children={<QnaPage />} />} />
         <Route path="/auth/verify-email" element={<VerifyEmail />} />
       </Routes>

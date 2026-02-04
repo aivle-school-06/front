@@ -13,8 +13,8 @@ const QnaPage: React.FC = () => {
   return (
     <div className="animate-in fade-in duration-700 space-y-8">
       <header className="flex flex-col gap-2">
-        <h2 className="text-4xl font-light serif text-white">Decision Room Q&amp;A</h2>
-        <p className="text-slate-400">공지사항과 Q&amp;A</p>
+        <h2 className="text-4xl font-light serif text-white">의사결정 룸</h2>
+        <p className="text-slate-400">Q&amp;A</p>
       </header>
 
       {isAdmin ? (
