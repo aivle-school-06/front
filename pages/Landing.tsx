@@ -140,10 +140,9 @@ const Landing: React.FC = () => {
         const duplicateMessage =
           (error instanceof ApiRequestError && error.apiError?.message) ||
           fieldErrors.email ||
-          message ||
-          '중복된 이메일입니다';
+          message;
         setAuthError(null);
-        setDuplicateEmailError(duplicateMessage);
+        setDuplicateEmailError(duplicateMessage ?? null);
         return;
       } else {
         if (Object.keys(fieldErrors).length > 0) {
