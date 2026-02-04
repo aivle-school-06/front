@@ -4,8 +4,6 @@ import {
   AuthSession,
   AuthUser,
   LoginRequest,
-  RefreshTokenRequest,
-  RefreshTokenResponse,
   RegisterRequest,
   SignupResponse,
 } from '../types/auth';
@@ -32,40 +30,27 @@ const storeSession = (session: AuthSession | null) => {
   window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
 };
 
-const buildMockUser = (email: string, name?: string, role: string = 'USER'): AuthUser => ({
+const buildMockUser = (email: string, name?: string): AuthUser => ({
   id: `user-${email}`,
   email,
   name: name ?? email.split('@')[0],
-  role,
 });
 
 export const getAuthToken = (): string | null => getStoredSession()?.token ?? null;
 
 export const getStoredUser = (): AuthUser | null => getStoredSession()?.user ?? null;
 
-export const updateStoredToken = (token: string): void => {
-  const session = getStoredSession();
-  if (!session) return;
-  storeSession({ ...session, token });
-};
-
-export const clearStoredSession = (): void => {
-  storeSession(null);
-};
-
 export const login = async (payload: LoginRequest): Promise<AuthSession> => {
   if (USE_MOCK_AUTH) {
     const session: AuthSession = {
       token: `mock-${Date.now()}`,
-      user: buildMockUser(payload.email, undefined, 'USER'),
+      user: buildMockUser(payload.email),
     };
     storeSession(session);
     return session;
   }
 
-  const response = await apiPost<AuthLoginResponse, LoginRequest>('/api/auth/login', payload, {
-    skipAuth: true,
-  });
+  const response = await apiPost<AuthLoginResponse, LoginRequest>('/api/auth/login', payload);
 
   const session: AuthSession = {
     token: response.accessToken,
@@ -73,7 +58,6 @@ export const login = async (payload: LoginRequest): Promise<AuthSession> => {
       id: response.user.userId,
       email: response.user.email,
       name: response.user.name,
-      role: response.user.role,
     },
   };
 
@@ -85,7 +69,7 @@ export const register = async (payload: RegisterRequest): Promise<SignupResponse
   if (USE_MOCK_AUTH) {
     const session: AuthSession = {
       token: `mock-${Date.now()}`,
-      user: buildMockUser(payload.email, payload.name, 'USER'),
+      user: buildMockUser(payload.email, payload.name),
     };
     storeSession(session);
     return {
@@ -97,40 +81,15 @@ export const register = async (payload: RegisterRequest): Promise<SignupResponse
     };
   }
 
-  return apiPost<SignupResponse, RegisterRequest>('/api/auth/signup', payload, {
-    skipAuth: true,
-  });
+  return apiPost<SignupResponse, RegisterRequest>('/api/auth/signup', payload);
 };
 
 export const logout = async (): Promise<void> => {
   if (USE_MOCK_AUTH) {
-    clearStoredSession();
+    storeSession(null);
     return;
   }
 
-  const logoutPromise = apiPost<void, Record<string, never>>(
-    '/api/auth/logout',
-    {},
-    { withCredentials: true }
-  );
-  clearStoredSession();
-  await logoutPromise;
-};
-
-export const refreshAccessToken = async (
-  payload: RefreshTokenRequest = {}
-): Promise<RefreshTokenResponse> => {
-  if (USE_MOCK_AUTH) {
-    return {
-      tokenType: 'Bearer',
-      accessToken: `mock-refresh-${Date.now()}`,
-      expiresIn: 1800,
-      passwordExpired: false,
-    };
-  }
-
-  return apiPost<RefreshTokenResponse, RefreshTokenRequest>('/api/auth/refresh', payload, {
-    skipAuth: true,
-    withCredentials: true,
-  });
+  await apiPost<void, Record<string, never>>('/api/auth/logout', {});
+  storeSession(null);
 };

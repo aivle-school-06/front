@@ -237,15 +237,15 @@ const DecisionRoom: React.FC = () => {
           <div className="glass-panel rounded-3xl p-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-2xl font-light serif text-white mb-2">Strategic Notices</h3>
+                <h3 className="text-2xl font-light serif text-white mb-2">Notices</h3>
                 <p className="text-xs text-slate-500 uppercase tracking-widest">
                   {bulletinMode === 'active'
-                    ? 'Active directives for company operations'
-                    : 'Archived directives & advisories'}
+                    ? '최근 공지사항'
+                    : '전체 공지사항'}
                 </p>
               </div>
               <div className="text-[10px] uppercase tracking-[0.3em] text-slate-500">
-                {bulletinMode === 'active' ? 'LIVE FEED' : 'ARCHIVE'}
+                {bulletinMode === 'active' ? 'RECENT' : 'ARCHIVE'}
               </div>
             </div>
 

@@ -19,8 +19,8 @@ const DecisionRoomHeader: React.FC<DecisionRoomHeaderProps> = ({
   return (
     <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
       <div>
-        <h2 className="text-4xl font-light serif text-white mb-2">Decision Room</h2>
-        <p className="text-slate-400">Q&amp;A and official company notices.</p>
+        <h2 className="text-4xl font-light serif text-white mb-2">의사결정 룸</h2>
+        <p className="text-slate-400">공지사항과 Q&A</p>
       </div>
 
       <div className="flex flex-col gap-3 items-start md:items-end">
