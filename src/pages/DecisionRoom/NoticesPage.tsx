@@ -84,6 +84,13 @@ const NoticesPage: React.FC = () => {
     return posts.filter((post) => post.status !== 'ACTIVE');
   }, [noticeMode, parseLocalDateTime, posts]);
 
+  const recentCutoff = useMemo(() => {
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - 3);
+    cutoff.setHours(0, 0, 0, 0);
+    return cutoff;
+  }, []);
+
   const mapPostToBulletin = useCallback((post: PostItem): Bulletin => {
     const summary =
       post.content.length > 140 ? `${post.content.slice(0, 140)}...` : post.content;
@@ -231,6 +238,42 @@ const NoticesPage: React.FC = () => {
             {noticeMode === 'active' ? 'RECENT FEED' : 'ARCHIVE'}
           </div>
         </div>
+        <details className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-slate-300">
+          <summary className="cursor-pointer text-[10px] uppercase tracking-[0.3em] text-slate-400">
+            디버그: 최근 3개월 판단
+          </summary>
+          <div className="mt-4 space-y-2">
+            <div className="text-[10px] uppercase tracking-[0.3em] text-slate-500">
+              기준일: {recentCutoff.toISOString().slice(0, 10)}
+            </div>
+            {posts.slice(0, 8).map((post) => {
+              const parsed = parseLocalDateTime(post.createdAt);
+              const isRecent =
+                post.status === 'ACTIVE' &&
+                parsed !== null &&
+                parsed.getTime() >= recentCutoff.getTime();
+              return (
+                <div key={`debug-${post.id}`} className="grid grid-cols-1 gap-1">
+                  <div>
+                    <span className="text-slate-500">id</span> {post.id} ·{' '}
+                    <span className="text-slate-500">status</span> {post.status}
+                  </div>
+                  <div>
+                    <span className="text-slate-500">createdAt</span> {post.createdAt}
+                  </div>
+                  <div>
+                    <span className="text-slate-500">parsed</span>{' '}
+                    {parsed ? parsed.toISOString() : '파싱 실패'}
+                  </div>
+                  <div>
+                    <span className="text-slate-500">recent</span>{' '}
+                    {isRecent ? 'YES' : 'NO'}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </details>
 
         <AsyncState
           isLoading={isLoadingNotices}
