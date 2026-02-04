@@ -145,7 +145,7 @@ const NoticesPage: React.FC = () => {
     <div className="animate-in fade-in duration-700 space-y-8">
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 className="text-4xl font-light serif text-white mb-2">Decision Room Notices</h2>
+          <h2 className="text-4xl font-light serif text-white mb-2">공지 사항</h2>
           <p className="text-slate-400">Official company notices.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -188,11 +188,11 @@ const NoticesPage: React.FC = () => {
       <div className="glass-panel rounded-3xl p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h3 className="text-2xl font-light serif text-white mb-2">Strategic Notices</h3>
+            <h3 className="text-2xl font-light serif text-white mb-2">최근 공지사항</h3>
             <p className="text-xs text-slate-500 uppercase tracking-widest">
               {noticeMode === 'active'
-                ? 'Active notices for company operations'
-                : 'Archived notices & advisories'}
+                ? '최근 3개월 간의 공지사항입니다.'
+                : '전체 공지사항'}
             </p>
           </div>
           <div className="text-[10px] uppercase tracking-[0.3em] text-slate-500">
