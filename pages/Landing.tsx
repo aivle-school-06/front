@@ -1,10 +1,11 @@
 // 애플리케이션 랜딩 페이지입니다.
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiRequestError } from '../src/api/client';
 import { login, register } from '../src/services/auth';
-import TurnstileWidget from '../src/components/TurnstileWidget';
+
+const TurnstileWidget = React.lazy(() => import('../src/components/TurnstileWidget'));
 
 type AuthMode = 'login' | 'register';
 
@@ -285,16 +286,18 @@ const Landing: React.FC = () => {
               )}
 
               {authMode === 'register' && (
-                <TurnstileWidget
-                  key={turnstileResetKey}
-                  className="mt-2"
-                  onVerify={(token) => {
-                    setTurnstileToken(token);
-                    if (token) {
-                      setAuthError(null);
-                    }
-                  }}
-                />
+                <Suspense fallback={<div className="mt-2 text-xs text-slate-500">Turnstile 로딩 중...</div>}>
+                  <TurnstileWidget
+                    key={turnstileResetKey}
+                    className="mt-2"
+                    onVerify={(token) => {
+                      setTurnstileToken(token);
+                      if (token) {
+                        setAuthError(null);
+                      }
+                    }}
+                  />
+                </Suspense>
               )}
 
               {authError && (
