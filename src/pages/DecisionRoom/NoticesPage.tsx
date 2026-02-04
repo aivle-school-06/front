@@ -21,6 +21,8 @@ const NoticesPage: React.FC = () => {
   const [editorTitle, setEditorTitle] = useState('');
   const [editorContent, setEditorContent] = useState('');
   const [editorError, setEditorError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
 
   const loadNotices = useCallback(async () => {
     setIsLoadingNotices(true);
@@ -44,6 +46,10 @@ const NoticesPage: React.FC = () => {
   useEffect(() => {
     loadNotices();
   }, [loadNotices]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [noticeMode, posts.length]);
 
   const parseLocalDateTime = useCallback((value: string): Date | null => {
     if (!value) return null;
@@ -85,15 +91,8 @@ const NoticesPage: React.FC = () => {
           })()
       );
     }
-    return posts.filter((post) => !isActiveStatus(post.status));
+    return posts;
   }, [isActiveStatus, noticeMode, parseLocalDateTime, posts]);
-
-  const recentCutoff = useMemo(() => {
-    const cutoff = new Date();
-    cutoff.setMonth(cutoff.getMonth() - 3);
-    cutoff.setHours(0, 0, 0, 0);
-    return cutoff;
-  }, []);
 
   const mapPostToBulletin = useCallback((post: PostItem): Bulletin => {
     const summary =
@@ -114,6 +113,14 @@ const NoticesPage: React.FC = () => {
     () => filteredPosts.map(mapPostToBulletin),
     [filteredPosts, mapPostToBulletin]
   );
+
+  const totalPages = Math.max(1, Math.ceil(notices.length / pageSize));
+
+  const pagedNotices = useMemo(() => {
+    const safePage = Math.min(currentPage, totalPages);
+    const start = (safePage - 1) * pageSize;
+    return notices.slice(start, start + pageSize);
+  }, [currentPage, notices, totalPages]);
 
   const selectedNotice = useMemo(
     () => notices.find((notice) => notice.id === selectedNoticeId) ?? null,
@@ -242,43 +249,6 @@ const NoticesPage: React.FC = () => {
             {noticeMode === 'active' ? 'RECENT FEED' : 'ARCHIVE'}
           </div>
         </div>
-        <details className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-slate-300">
-          <summary className="cursor-pointer text-[10px] uppercase tracking-[0.3em] text-slate-400">
-            디버그: 최근 3개월 판단
-          </summary>
-          <div className="mt-4 space-y-2">
-            <div className="text-[10px] uppercase tracking-[0.3em] text-slate-500">
-              기준일: {recentCutoff.toISOString().slice(0, 10)}
-            </div>
-            {posts.slice(0, 8).map((post) => {
-              const parsed = parseLocalDateTime(post.createdAt);
-              const isRecent =
-                isActiveStatus(post.status) &&
-                parsed !== null &&
-                parsed.getTime() >= recentCutoff.getTime();
-              return (
-                <div key={`debug-${post.id}`} className="grid grid-cols-1 gap-1">
-                  <div>
-                    <span className="text-slate-500">id</span> {post.id} ·{' '}
-                    <span className="text-slate-500">status</span> {post.status}
-                  </div>
-                  <div>
-                    <span className="text-slate-500">createdAt</span> {post.createdAt}
-                  </div>
-                  <div>
-                    <span className="text-slate-500">parsed</span>{' '}
-                    {parsed ? parsed.toISOString() : '파싱 실패'}
-                  </div>
-                  <div>
-                    <span className="text-slate-500">recent</span>{' '}
-                    {isRecent ? 'YES' : 'NO'}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </details>
-
         <AsyncState
           isLoading={isLoadingNotices}
           error={errorNotices}
@@ -286,7 +256,44 @@ const NoticesPage: React.FC = () => {
           onRetry={loadNotices}
           emptyMessage="공지 사항이 준비되면 여기에 표시됩니다."
         >
-          <BulletinGrid bulletins={notices} onOpen={setSelectedNoticeId} />
+          <div className="space-y-6">
+            <BulletinGrid bulletins={pagedNotices} onOpen={setSelectedNoticeId} />
+            {notices.length > pageSize && (
+              <div className="flex flex-col items-center gap-3 text-xs text-slate-400">
+                <div className="text-[10px] uppercase tracking-[0.3em] text-slate-500">
+                  Page {Math.min(currentPage, totalPages)} / {totalPages}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage <= 1}
+                    className={`px-4 py-2 rounded-full border text-[10px] uppercase tracking-[0.3em] transition ${
+                      currentPage <= 1
+                        ? 'border-white/10 text-slate-600'
+                        : 'border-white/20 text-slate-300 hover:bg-white/5'
+                    }`}
+                  >
+                    Prev
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    disabled={currentPage >= totalPages}
+                    className={`px-4 py-2 rounded-full border text-[10px] uppercase tracking-[0.3em] transition ${
+                      currentPage >= totalPages
+                        ? 'border-white/10 text-slate-600'
+                        : 'border-white/20 text-slate-300 hover:bg-white/5'
+                    }`}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </AsyncState>
       </div>
 
