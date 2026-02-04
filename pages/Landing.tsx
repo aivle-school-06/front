@@ -212,9 +212,9 @@ const Landing: React.FC = () => {
     <div className="min-h-screen bg-[#050505] text-white selection:bg-slate-500 selection:text-white relative">
       <SuccessModal
         open={showSignupSuccess}
-        title="?뚯썝媛???대찓???몄쬆"
-        message="?낅젰?섏떊 二쇱냼濡??대찓?쇱쓣 蹂대깉?듬땲?? ?뺤씤?섍퀬 ?몄쬆?댁＜?몄슂."
-        confirmLabel="濡쒓렇???섎윭媛湲?
+        title="회원가입 이메일 인증"
+        message="입력하신 주소로 이메일을 보냈습니다. 확인 후 인증해 주세요."
+        confirmLabel="로그인으로 돌아가기"
         onConfirm={handleSignupSuccessConfirm}
       />
       
@@ -239,23 +239,23 @@ const Landing: React.FC = () => {
                  <i className="fas fa-eye text-xs text-white"></i>
               </div>
               <h2 className="text-3xl font-light serif mb-2">
-                {authMode === 'login' ? '濡쒓렇?? : '?뚯썝媛??}
+                {authMode === 'login' ? '로그인' : '회원가입'}
               </h2>
               <p className="text-xs text-slate-500 uppercase tracking-[0.2em]">
-                {authMode === 'login' ? '吏湲?諛붾줈 ?쒖옉?섏꽭?? : '吏湲?諛붾줈 李몄뿬?섏꽭??}
+                {authMode === 'login' ? '지금 바로 시작하세요' : '지금 바로 참여하세요'}
               </p>
             </div>
 
             <form onSubmit={handleAuthSubmit} className="space-y-5">
               {authMode === 'register' && (
                 <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-                  <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold ml-1">?대쫫</label>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold ml-1">이름</label>
                   <input 
                     type="text" 
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="ID瑜??낅젰??二쇱꽭??
+                    placeholder="이름을 입력해 주세요."
                     className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-white/30 transition-all outline-none text-white placeholder-slate-700"
                     aria-invalid={Boolean(errors.name)}
                   />
@@ -268,7 +268,7 @@ const Landing: React.FC = () => {
               )}
               
               <div className="space-y-2 relative">
-                <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold ml-1">?대찓??/label>
+                <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold ml-1">이메일</label>
                 <input 
                   type="email" 
                   required
@@ -281,7 +281,7 @@ const Landing: React.FC = () => {
                       return rest;
                     });
                   }}
-                  placeholder="?대찓?쇱쓣 ?낅젰??二쇱꽭??
+                  placeholder="이메일을 입력해 주세요."
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-white/30 transition-all outline-none text-white placeholder-slate-700"
                   aria-invalid={Boolean(errors.email)}
                   aria-describedby={duplicateEmailError ? 'duplicate-email-tooltip' : undefined}
@@ -304,13 +304,13 @@ const Landing: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold ml-1">鍮꾨?踰덊샇</label>
+                <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold ml-1">비밀번호</label>
                 <input 
                   type="password" 
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="?™™™™™™™™™™™?
+                  placeholder="********"
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-white/30 transition-all outline-none text-white placeholder-slate-700"
                   aria-invalid={Boolean(errors.password)}
                 />
@@ -323,13 +323,13 @@ const Landing: React.FC = () => {
 
               {authMode === 'register' && (
                 <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-                  <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold ml-1">鍮꾨?踰덊샇 ?뺤씤</label>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold ml-1">비밀번호 확인</label>
                   <input 
                     type="password" 
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="?™™™™™™™™™™™?
+                    placeholder="********"
                     className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-white/30 transition-all outline-none text-white placeholder-slate-700"
                     aria-invalid={Boolean(errors.confirmPassword)}
                   />
@@ -363,7 +363,7 @@ const Landing: React.FC = () => {
                 className="w-full py-5 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-[0.2em] hover:bg-slate-200 transition-all shadow-xl mt-4 disabled:cursor-not-allowed disabled:opacity-70"
                 disabled={isSubmitting || (authMode === 'register' && !turnstileToken)}
               >
-                {isSubmitting ? '泥섎━ 以?..' : authMode === 'login' ? '濡쒓렇?? : '媛??}
+                {isSubmitting ? '처리 중..' : authMode === 'login' ? '로그인' : '가입'}
               </button>
             </form>
 
@@ -373,7 +373,7 @@ const Landing: React.FC = () => {
                 className="w-full py-4 border border-white/10 text-slate-300 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 hover:text-white transition-all flex items-center justify-center space-x-2"
               >
                 <i className={`fas ${authMode === 'login' ? 'fa-plus' : 'fa-lock'} text-[8px]`}></i>
-                <span>{authMode === 'login' ? '??怨꾩젙 ?앹꽦' : '?≪꽭???ы꽭濡??뚯븘媛湲?}</span>
+                <span>{authMode === 'login' ? '계정 생성' : '로그인으로 돌아가기'}</span>
               </button>
             </div>
           </div>
@@ -394,8 +394,8 @@ const Landing: React.FC = () => {
           </div>
           
           <div className="hidden md:flex items-center space-x-10 text-[10px] uppercase tracking-[0.2em] font-medium text-slate-400">
-            <a href="#platform" className="hover:text-white transition-colors">?뚮옯??/a>
-            <a href="#network" className="hover:text-white transition-colors">?ㅽ듃?뚰겕</a>
+            <a href="#platform" className="hover:text-white transition-colors">플랫폼</a>
+            <a href="#network" className="hover:text-white transition-colors">네트워크</a>
             {isAuthenticated ? (
               <button
                 onClick={handleLogout}
@@ -444,7 +444,7 @@ const Landing: React.FC = () => {
         </div>
 
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-4 opacity-60">
-           <span className="text-[9px] uppercase tracking-[0.5em] text-white">?먯깋</span>
+               <span className="text-[9px] uppercase tracking-[0.5em] text-white">SCROLL</span>
            <div className="w-[1px] h-16 bg-gradient-to-b from-white to-transparent"></div>
         </div>
       </section>
@@ -472,7 +472,7 @@ const Landing: React.FC = () => {
               <span className="bg-white/10 p-4 rounded-full group-hover:bg-white group-hover:text-black transition-all">
                 <i className="fas fa-arrow-right"></i>
               </span>
-              <span>?뚮옯???뚯븘蹂닿린</span>
+              <span>플랫폼 더 알아보기</span>
             </button>
           </div>
         </div>
@@ -512,7 +512,7 @@ const Landing: React.FC = () => {
                </div>
                <h2 className="text-4xl md:text-5xl serif leading-tight mb-8">
                  ?곕━??<br/>
-                 <span className="italic text-slate-400">?곗씠??/span>瑜??쎄퀬, <br/>
+                 <span className="italic text-slate-400">데이터</span>를 쓰고, <br/>
                  ?먮떒 媛?ν븳 ?몄궗?댄듃濡?<br/> ?쒓났?⑸땲??
                </h2>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
@@ -551,7 +551,7 @@ const Landing: React.FC = () => {
                       preload="auto"
                      />
                   </div>
-                  <div className="flex justify-between text-[10px] text-slate-500 uppercase tracking-widest mb-4"><span>RECENT</span><span>2026??01??26??/span></div>
+                  <div className="flex justify-between text-[10px] text-slate-500 uppercase tracking-widest mb-4"><span>RECENT</span><span>2026.01.26</span></div>
                   <h3 className="text-3xl serif mb-4 group-hover:text-slate-300 transition-colors">?곗씠??湲곕컲 ?듯빀 由ъ뒪???좏샇 ?ъ갑</h3>
                   <p className="text-slate-500 text-sm mb-6 max-w-xl">?щТ 吏?? ?꾧툑?먮쫫, ?몃? ?섍꼍 ?곗씠?곕? 寃고빀??湲곗뾽??援ъ“???꾪뿕 ?좏샇瑜?議곌린???앸퀎, <br/>?몄궗?댄듃瑜??쒓났?⑸땲??</p>
                   <span className="text-[10px] uppercase tracking-widest font-bold border-b border-white/20 pb-1 group-hover:border-white transition-all">湲곗궗 ?쎄린</span>
@@ -597,9 +597,9 @@ const Landing: React.FC = () => {
              <div className="md:col-span-4"><p className="mb-4">짤 2026 SENTINEL. All rights reserved.</p></div>
              <div className="md:col-span-2 flex flex-col space-y-2">
                 <span className="text-white font-bold mb-2">?섎윭蹂닿린</span>
-                <a href="#" className="hover:text-white transition-colors">?뚮옯??/a>
+                <a href="#" className="hover:text-white transition-colors">플랫폼</a>
                 <a href="#" className="hover:text-white transition-colors">?뚯궗</a>
-                <a href="#" className="hover:text-white transition-colors">?댁뒪猷?/a>
+                <a href="#" className="hover:text-white transition-colors">뉴스룸</a>
              </div>
              <div className="md:col-span-2 flex flex-col space-y-2">
                 <span className="text-white font-bold mb-2">?곌껐</span>
