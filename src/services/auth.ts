@@ -4,6 +4,8 @@ import {
   AuthSession,
   AuthUser,
   LoginRequest,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
   RegisterRequest,
   SignupResponse,
 } from '../types/auth';
@@ -92,4 +94,19 @@ export const logout = async (): Promise<void> => {
 
   await apiPost<void, Record<string, never>>('/api/auth/logout', {});
   storeSession(null);
+};
+
+export const refreshAccessToken = async (
+  payload: RefreshTokenRequest
+): Promise<RefreshTokenResponse> => {
+  if (USE_MOCK_AUTH) {
+    return {
+      tokenType: 'Bearer',
+      accessToken: `mock-refresh-${Date.now()}`,
+      expiresIn: 1800,
+      passwordExpired: false,
+    };
+  }
+
+  return apiPost<RefreshTokenResponse, RefreshTokenRequest>('/api/auth/refresh', payload);
 };

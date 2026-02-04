@@ -42,3 +42,14 @@ export interface RegisterRequest {
   name: string;
   turnstileToken: string;
 }
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface RefreshTokenResponse {
+  tokenType: string;
+  accessToken: string;
+  expiresIn: number;
+  passwordExpired: boolean;
+}
