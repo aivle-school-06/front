@@ -152,14 +152,8 @@ const AdminQnaPanel: React.FC<AdminQnaPanelProps> = ({ api }) => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 min-h-[560px] lg:grid-cols-[minmax(0,0.26fr)_minmax(0,0.38fr)_minmax(0,0.36fr)]">
-        <AsyncState
-          isLoading={isLoadingQa}
-          error={errorQa}
-          empty={!isLoadingQa && !errorQa && qaPosts.length === 0}
-          onRetry={loadQaPosts}
-          emptyMessage="등록된 Q&A가 없습니다. 질문을 작성해 보세요."
-        >
-          <div className="mb-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-300">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-300">
             <span className="uppercase tracking-[0.2em] text-slate-500">선택된 질문자</span>
             <span className="text-white">{qaAuthorFilter === 'all' ? '전체' : qaAuthorFilter}</span>
           </div>
@@ -172,6 +166,15 @@ const AdminQnaPanel: React.FC<AdminQnaPanelProps> = ({ api }) => {
             sortValue={qaAuthorSort}
             onSortChange={setQaAuthorSort}
           />
+        </div>
+
+        <AsyncState
+          isLoading={isLoadingQa}
+          error={errorQa}
+          empty={!isLoadingQa && !errorQa && qaPosts.length === 0}
+          onRetry={loadQaPosts}
+          emptyMessage="등록된 Q&A가 없습니다. 질문을 작성해 보세요."
+        >
           <QaList
             posts={filteredQaPosts}
             selectedId={selectedPostId}
