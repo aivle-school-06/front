@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Bulletin } from '../../types/decisionRoom';
 import { getFileDownloadUrl } from '../../api/posts';
+import { getAuthToken } from '../../services/auth';
 
 interface BulletinModalProps {
   open: boolean;
@@ -19,7 +20,22 @@ const BulletinModal: React.FC<BulletinModalProps> = ({ open, bulletin, onClose, 
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
-  const handleDownload = useCallback(async (link: { url: string; fileId?: number }) => {
+  const resolveApiUrl = useCallback((path: string) => {
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '');
+    return path.startsWith('http') ? path : `${baseUrl}${path}`;
+  }, []);
+
+  const triggerDownload = (url: string, filename: string) => {
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.rel = 'noopener noreferrer';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  };
+
+  const handleOpen = useCallback(async (link: { url: string; fileId?: number }) => {
     setDownloadError(null);
     if (link.fileId) {
       setDownloadingId(link.fileId);
@@ -41,6 +57,45 @@ const BulletinModal: React.FC<BulletinModalProps> = ({ open, bulletin, onClose, 
       window.open(link.url, '_blank', 'noopener,noreferrer');
     }
   }, []);
+
+  const handleDownload = useCallback(
+    async (link: { url: string; fileId?: number; label?: string }) => {
+      setDownloadError(null);
+      const filename = link.label ?? 'attachment';
+
+      if (link.fileId) {
+        setDownloadingId(link.fileId);
+        try {
+          const token = getAuthToken();
+          const response = await fetch(resolveApiUrl(`/api/files/${link.fileId}`), {
+            method: 'GET',
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('download failed');
+          }
+
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          triggerDownload(url, filename);
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          setDownloadError('파일 다운로드에 실패했습니다.');
+        } finally {
+          setDownloadingId(null);
+        }
+        return;
+      }
+
+      if (link.url) {
+        triggerDownload(link.url, filename);
+      }
+    },
+    [resolveApiUrl],
+  );
 
   if (!open || !bulletin) return null;
 
@@ -99,7 +154,7 @@ const BulletinModal: React.FC<BulletinModalProps> = ({ open, bulletin, onClose, 
               >
                 <button
                   type="button"
-                  onClick={() => handleDownload(link)}
+                  onClick={() => handleOpen(link)}
                   disabled={Boolean(link.fileId && downloadingId === link.fileId)}
                   className="flex-1 text-left text-sm text-slate-300 hover:text-white transition"
                 >
