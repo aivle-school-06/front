@@ -45,3 +45,7 @@ export const uploadPostFiles = async (
   });
   return apiPostForm<PostFileItem[] | string>(`/api/posts/${postId}/files`, formData);
 };
+
+export const getFileDownloadUrl = async (fileId: number | string): Promise<{ url: string }> => {
+  return apiGet<{ url: string }>(`/api/files/${fileId}/url`);
+};

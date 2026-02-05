@@ -136,7 +136,8 @@ const NoticesPage: React.FC = () => {
       date: post.createdAt,
       links: files.map((file) => ({
         label: file.originalFilename,
-        url: file.storageUrl || `/api/files/${file.id}`,
+        url: file.storageUrl || '',
+        fileId: file.id,
       })),
     };
   }, [noticeFiles]);

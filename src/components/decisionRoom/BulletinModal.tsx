@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { Bulletin } from '../../types/decisionRoom';
+import { getFileDownloadUrl } from '../../api/posts';
 
 interface BulletinModalProps {
   open: boolean;
@@ -15,6 +16,32 @@ const tagStyles: Record<string, string> = {
 };
 
 const BulletinModal: React.FC<BulletinModalProps> = ({ open, bulletin, onClose, onDelete }) => {
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  const handleDownload = useCallback(async (link: { url: string; fileId?: number }) => {
+    setDownloadError(null);
+    if (link.fileId) {
+      setDownloadingId(link.fileId);
+      try {
+        const response = await getFileDownloadUrl(link.fileId);
+        if (response?.url) {
+          window.open(response.url, '_blank', 'noopener,noreferrer');
+        } else {
+          setDownloadError('다운로드 URL을 찾지 못했습니다.');
+        }
+      } catch (error) {
+        setDownloadError('파일 다운로드에 실패했습니다.');
+      } finally {
+        setDownloadingId(null);
+      }
+      return;
+    }
+    if (link.url) {
+      window.open(link.url, '_blank', 'noopener,noreferrer');
+    }
+  }, []);
+
   if (!open || !bulletin) return null;
 
   return (
@@ -69,16 +96,15 @@ const BulletinModal: React.FC<BulletinModalProps> = ({ open, bulletin, onClose, 
               <button
                 key={link.label}
                 type="button"
-                onClick={() => {
-                  if (!link.url) return;
-                  window.open(link.url, '_blank', 'noopener,noreferrer');
-                }}
+                onClick={() => handleDownload(link)}
+                disabled={Boolean(link.fileId && downloadingId === link.fileId)}
                 className="flex items-center justify-between px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/30 transition"
               >
                 <span>{link.label}</span>
                 <i className="fas fa-external-link-alt text-xs text-slate-500"></i>
               </button>
             ))}
+            {downloadError && <span className="text-rose-400 text-xs">{downloadError}</span>}
           </div>
         </div>
 

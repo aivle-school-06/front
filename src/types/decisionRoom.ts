@@ -6,6 +6,7 @@ export type BulletinTag = 'URGENT' | 'UPDATE' | 'ADVISORY';
 export interface BulletinLink {
   label: string;
   url: string;
+  fileId?: number;
 }
 
 export interface Bulletin {
