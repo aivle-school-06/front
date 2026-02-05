@@ -7,6 +7,7 @@ import RiskStatusTrendCard from '../features/dashboard/risk-status-trend/RiskSta
 import RiskDistributionCard from '../components/dashboard/RiskDistributionCard';
 import { getDashboardSummary } from '../api/companies';
 import { companyRiskQuarterlyMock } from '../mocks/companyRiskQuarterly.mock';
+import { getMockDashboardSummary } from '../mocks/dashboardSummary.mock';
 import { getStoredUser, logout } from '../services/auth';
 import { DashboardSummary, RiskDistribution } from '../types/dashboard';
 
@@ -34,18 +35,23 @@ const DashboardPage: React.FC = () => {
   const [riskDistribution, setRiskDistribution] = useState<RiskDistribution | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
+  const [fallbackMessage, setFallbackMessage] = useState<string | null>(null);
   const [userName] = useState(() => getStoredUser()?.name ?? 'id');
 
   const loadSummary = useCallback(async () => {
     setIsLoading(true);
     setIsError(false);
+    setFallbackMessage(null);
 
     try {
       const response = await getDashboardSummary();
       setData(response);
       setRiskDistribution(buildRiskDistribution(response));
     } catch (error) {
-      setIsError(true);
+      const fallback = getMockDashboardSummary();
+      setData(fallback);
+      setRiskDistribution(buildRiskDistribution(fallback));
+      setFallbackMessage('대시보드 API 응답 오류로 목 데이터를 표시하고 있어요.');
     } finally {
       setIsLoading(false);
     }
@@ -112,6 +118,11 @@ const DashboardPage: React.FC = () => {
 
       {!isLoading && !isError && data && riskDistribution && (
         <div>
+          {fallbackMessage && (
+            <div className="mb-6 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-6 py-4 text-sm text-amber-100">
+              {fallbackMessage}
+            </div>
+          )}
           <KpiCards kpis={data.kpis} riskRecords={companyRiskQuarterlyMock} />
 
           {emptyState && (
