@@ -1,13 +1,13 @@
 // 메인 애플리케이션 셸로 라우팅과 대시보드 레이아웃을 구성합니다.
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/DashboardPage';
 import Companies from './pages/Companies';
 import CompanyDetail from './pages/CompanyDetail';
 import QnaPage from './pages/DecisionRoom/QnaPage';
 import NoticesPage from './pages/DecisionRoom/NoticesPage';
 import Landing from './pages/Landing';
-import AddCompany from './pages/companies/add';
+import AddCompany from './pages/companies/AddCompany';
 import VerifyEmail from './pages/auth/VerifyEmail';
 import { getStoredUser } from './services/auth';
 
