@@ -40,3 +40,13 @@ export interface PostUpdateRequest {
   title: string;
   content: string;
 }
+
+export interface PostFileItem {
+  id: number;
+  postId: number;
+  storageUrl: string;
+  originalFilename: string;
+  fileSize: number;
+  contentType: string;
+  createdAt: string;
+}

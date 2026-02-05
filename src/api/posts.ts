@@ -1,6 +1,7 @@
-import { apiDelete, apiGet, apiPatch, apiPost } from './client';
+import { apiDelete, apiGet, apiPatch, apiPost, apiPostForm } from './client';
 import {
   PostCreateRequest,
+  PostFileItem,
   PostItem,
   PostListData,
   PostListParams,
@@ -28,4 +29,19 @@ export const updatePost = async (
 
 export const deletePost = async (postId: number | string): Promise<string> => {
   return apiDelete<string>(`/api/posts/${postId}`);
+};
+
+export const listPostFiles = async (postId: number | string): Promise<PostFileItem[]> => {
+  return apiGet<PostFileItem[]>(`/api/posts/${postId}/files`);
+};
+
+export const uploadPostFiles = async (
+  postId: number | string,
+  files: File[],
+): Promise<PostFileItem[] | string> => {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+  return apiPostForm<PostFileItem[] | string>(`/api/posts/${postId}/files`, formData);
 };

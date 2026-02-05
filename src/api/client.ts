@@ -197,6 +197,76 @@ export const apiPost = async <T, B = unknown>(
   return unwrapApiResponse(response);
 };
 
+export const apiPostForm = async <T>(
+  url: string,
+  formData: FormData,
+  options?: Pick<RequestOptions, 'skipAuth' | 'withCredentials'>,
+): Promise<T> => {
+  const token = options?.skipAuth ? null : getAuthToken();
+  const resolvedUrl = buildUrl(url);
+  const response = await fetch(resolvedUrl, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    credentials: options?.withCredentials ? 'include' : 'omit',
+    body: formData,
+  });
+
+  if (
+    response.status === 401 &&
+    !options?.skipAuth &&
+    !isRefreshEndpoint(resolvedUrl)
+  ) {
+    try {
+      const refreshResponse = await refreshAccessToken();
+      updateStoredToken(refreshResponse.accessToken);
+      return apiPostForm<T>(url, formData, { ...options });
+    } catch (error) {
+      clearStoredSession();
+      window.location.href = '/';
+      throw error;
+    }
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const contentType = response.headers.get('content-type') ?? '';
+  if (!contentType.includes('application/json')) {
+    if (!response.ok) {
+      throw new ApiRequestError('API request failed', { status: response.status });
+    }
+    return undefined as T;
+  }
+
+  const payload = (await response.json()) as unknown;
+
+  if (!response.ok) {
+    let apiError: ApiError | undefined;
+    let message = 'API request failed';
+
+    if (isApiResponse(payload)) {
+      apiError = payload.error ?? undefined;
+      if (typeof apiError?.message === 'string') {
+        message = apiError.message;
+      }
+    } else if (payload && typeof payload === 'object') {
+      const record = payload as Record<string, unknown>;
+      if (typeof record.message === 'string') {
+        message = record.message;
+      }
+      apiError = { message, status: response.status };
+    }
+
+    apiError = { ...(apiError ?? {}), status: apiError?.status ?? response.status };
+    throw new ApiRequestError(message, apiError);
+  }
+
+  return unwrapApiResponse(payload as ApiResponse<T>);
+};
+
 export const apiPatch = async <T, B = unknown>(
   url: string,
   body: B,

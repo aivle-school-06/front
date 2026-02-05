@@ -3,8 +3,8 @@ import BulletinGrid from '../../components/decisionRoom/BulletinGrid';
 import BulletinModal from '../../components/decisionRoom/BulletinModal';
 import AsyncState from '../../components/common/AsyncState';
 import { Bulletin } from '../../types/decisionRoom';
-import { createPost, deletePost, listPosts, updatePost } from '../../api/posts';
-import { PostItem } from '../../types/post';
+import { createPost, deletePost, listPostFiles, listPosts, updatePost, uploadPostFiles } from '../../api/posts';
+import { PostFileItem, PostItem } from '../../types/post';
 import { getStoredUser } from '../../services/auth';
 
 const NoticesPage: React.FC = () => {
@@ -21,8 +21,36 @@ const NoticesPage: React.FC = () => {
   const [editorTitle, setEditorTitle] = useState('');
   const [editorContent, setEditorContent] = useState('');
   const [editorError, setEditorError] = useState<string | null>(null);
+  const [editorFiles, setEditorFiles] = useState<File[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [noticeFiles, setNoticeFiles] = useState<Record<string, PostFileItem[]>>({});
+  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
+  const [errorFiles, setErrorFiles] = useState<string | null>(null);
   const pageSize = 6;
+
+  const formatFileSize = useCallback((size: number) => {
+    if (!Number.isFinite(size)) return '-';
+    if (size < 1024) return `${size}B`;
+    const kb = size / 1024;
+    if (kb < 1024) return `${kb.toFixed(1)}KB`;
+    const mb = kb / 1024;
+    if (mb < 1024) return `${mb.toFixed(1)}MB`;
+    const gb = mb / 1024;
+    return `${gb.toFixed(1)}GB`;
+  }, []);
+
+  const loadNoticeFiles = useCallback(async (postId: string) => {
+    setIsLoadingFiles(true);
+    setErrorFiles(null);
+    try {
+      const files = await listPostFiles(postId);
+      setNoticeFiles((prev) => ({ ...prev, [postId]: files }));
+    } catch (error) {
+      setErrorFiles('첨부 파일을 불러오는 중 문제가 발생했습니다.');
+    } finally {
+      setIsLoadingFiles(false);
+    }
+  }, []);
 
   const loadNotices = useCallback(async () => {
     setIsLoadingNotices(true);
@@ -97,6 +125,7 @@ const NoticesPage: React.FC = () => {
   const mapPostToBulletin = useCallback((post: PostItem): Bulletin => {
     const summary =
       post.content.length > 140 ? `${post.content.slice(0, 140)}...` : post.content;
+    const files = noticeFiles[String(post.id)] ?? [];
     return {
       id: String(post.id),
       title: post.title,
@@ -105,9 +134,12 @@ const NoticesPage: React.FC = () => {
       tag: post.isPinned ? 'URGENT' : 'UPDATE',
       issuedBy: `User ${post.userId}`,
       date: post.createdAt,
-      links: [],
+      links: files.map((file) => ({
+        label: file.originalFilename,
+        url: file.storageUrl || `/api/files/${file.id}`,
+      })),
     };
-  }, []);
+  }, [noticeFiles]);
 
   const notices = useMemo(
     () => filteredPosts.map(mapPostToBulletin),
@@ -127,11 +159,18 @@ const NoticesPage: React.FC = () => {
     [notices, selectedNoticeId]
   );
 
+  useEffect(() => {
+    if (!selectedNoticeId) return;
+    if (noticeFiles[selectedNoticeId]) return;
+    loadNoticeFiles(selectedNoticeId);
+  }, [loadNoticeFiles, noticeFiles, selectedNoticeId]);
+
   const handleOpenCreate = () => {
     setEditingPost(null);
     setEditorTitle('');
     setEditorContent('');
     setEditorError(null);
+    setEditorFiles([]);
     setEditorOpen(true);
   };
 
@@ -143,7 +182,20 @@ const NoticesPage: React.FC = () => {
     setEditorTitle(post.title);
     setEditorContent(post.content);
     setEditorError(null);
+    setEditorFiles([]);
+    loadNoticeFiles(String(post.id));
     setEditorOpen(true);
+  };
+
+  const handleFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+    setEditorFiles((prev) => [...prev, ...files]);
+    event.target.value = '';
+  };
+
+  const handleRemoveEditorFile = (index: number) => {
+    setEditorFiles((prev) => prev.filter((_, idx) => idx !== index));
   };
 
   const handleSave = async () => {
@@ -164,6 +216,10 @@ const NoticesPage: React.FC = () => {
           prev.map((item) => (item.id === updated.id ? updated : item))
         );
         setSelectedNoticeId(String(updated.id));
+        if (editorFiles.length > 0) {
+          await uploadPostFiles(updated.id, editorFiles);
+          await loadNoticeFiles(String(updated.id));
+        }
       } else {
         const created = await createPost({
           categoryId: 1,
@@ -172,10 +228,14 @@ const NoticesPage: React.FC = () => {
         });
         setPosts((prev) => [created, ...prev]);
         setSelectedNoticeId(String(created.id));
+        if (editorFiles.length > 0) {
+          await uploadPostFiles(created.id, editorFiles);
+          await loadNoticeFiles(String(created.id));
+        }
       }
       setEditorOpen(false);
     } catch (error) {
-      setEditorError('저장 중 문제가 발생했습니다.');
+      setEditorError('저장 또는 파일 업로드 중 문제가 발생했습니다.');
     }
   };
 
@@ -340,6 +400,80 @@ const NoticesPage: React.FC = () => {
                   className="mt-2 w-full min-h-[200px] bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-white/20"
                   placeholder="공지 내용을 입력하세요."
                 />
+              </div>
+              <div className="space-y-3">
+                <label className="text-[10px] uppercase tracking-[0.3em] text-slate-500">
+                  첨부 파일
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    id="notice-file-input"
+                    type="file"
+                    multiple
+                    onChange={handleFilesChange}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="notice-file-input"
+                    className="px-4 py-2 rounded-full bg-white/10 border border-white/10 text-[10px] uppercase tracking-[0.3em] text-slate-200 hover:bg-white/20 transition cursor-pointer"
+                  >
+                    파일 선택
+                  </label>
+                  <span className="text-xs text-slate-500">
+                    {editorFiles.length > 0
+                      ? `${editorFiles.length}개 선택됨`
+                      : '선택된 파일 없음'}
+                  </span>
+                </div>
+
+                {editorFiles.length > 0 && (
+                  <div className="space-y-2">
+                    {editorFiles.map((file, index) => (
+                      <div
+                        key={`${file.name}-${index}`}
+                        className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="truncate max-w-[220px]">{file.name}</span>
+                          <span className="text-slate-500">{formatFileSize(file.size)}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEditorFile(index)}
+                          className="text-[10px] uppercase tracking-[0.2em] text-rose-300 hover:text-rose-200"
+                        >
+                          제거
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {editingPost && (
+                  <div className="space-y-2 rounded-2xl border border-white/5 bg-white/5 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                      기존 첨부 파일
+                    </p>
+                    {isLoadingFiles && (
+                      <p className="text-xs text-slate-500">첨부 파일을 불러오는 중...</p>
+                    )}
+                    {errorFiles && <p className="text-xs text-rose-400">{errorFiles}</p>}
+                    {!isLoadingFiles &&
+                      !errorFiles &&
+                      (noticeFiles[String(editingPost.id)]?.length ?? 0) === 0 && (
+                        <p className="text-xs text-slate-500">첨부 파일이 없습니다.</p>
+                      )}
+                    {(noticeFiles[String(editingPost.id)] ?? []).map((file) => (
+                      <div
+                        key={file.id}
+                        className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300"
+                      >
+                        <span className="truncate max-w-[220px]">{file.originalFilename}</span>
+                        <span className="text-slate-500">{formatFileSize(file.fileSize)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               {editorError && <p className="text-xs text-rose-400">{editorError}</p>}
             </div>

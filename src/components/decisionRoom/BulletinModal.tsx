@@ -69,6 +69,10 @@ const BulletinModal: React.FC<BulletinModalProps> = ({ open, bulletin, onClose, 
               <button
                 key={link.label}
                 type="button"
+                onClick={() => {
+                  if (!link.url) return;
+                  window.open(link.url, '_blank', 'noopener,noreferrer');
+                }}
                 className="flex items-center justify-between px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/30 transition"
               >
                 <span>{link.label}</span>
