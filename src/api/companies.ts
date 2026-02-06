@@ -3,6 +3,7 @@ import { apiGet, apiPost } from './client';
 import {
   CompanyConfirmRequest,
   CompanyConfirmResult,
+  CompanyInsightItem,
   CompanyOverview,
   CompanySearchResponse,
   CompanySummary,
@@ -47,6 +48,13 @@ export const getCompanySummary = async (companyId: string): Promise<CompanySumma
 export const getCompanyOverview = async (companyId: string): Promise<CompanyOverview> => {
   // TODO(API 연결): 더미 데이터 제거 후 이 함수 사용
   return apiGet<CompanyOverview>(`/api/companies/${companyId}/overview`);
+};
+
+export const getCompanyInsights = async (
+  companyId: string,
+): Promise<CompanyInsightItem[]> => {
+  // TODO(API 연결): 더미 데이터 제거 후 이 함수 사용
+  return apiGet<CompanyInsightItem[]>(`/api/companies/${companyId}/insights`);
 };
 
 export const getDashboardSummary = async (): Promise<DashboardSummary> => {

@@ -165,3 +165,14 @@ export interface CompanyTimelineItem {
   title: string;
   tone: 'positive' | 'neutral' | 'risk';
 }
+
+export interface CompanyInsightItem {
+  id: string | number;
+  title: string;
+  body?: string;
+  content?: string;
+  source?: string;
+  publishedAt?: string;
+  url?: string;
+  type?: 'REPORT' | 'NEWS';
+}

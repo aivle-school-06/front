@@ -9,12 +9,16 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { ForecastResponse, MetricSeries } from '../../types/company';
+import { CompanyInsightItem, ForecastResponse, MetricSeries } from '../../types/company';
 import AiCommentaryCard from './AiCommentaryCard';
+import CompanyNewsModal from './CompanyNewsModal';
+import ReportSummaryCard from './ReportSummaryCard';
 
 interface MetricForecastChartPanelProps {
   metricForecast: ForecastResponse;
   commentary: string;
+  reportSummary?: string;
+  newsItems?: CompanyInsightItem[];
 }
 
 const parseQuarter = (quarter: string) => {
@@ -36,11 +40,14 @@ const shiftQuarter = (quarter: string, delta: number) => {
 const MetricForecastChartPanel: React.FC<MetricForecastChartPanelProps> = ({
   metricForecast,
   commentary,
+  reportSummary = '',
+  newsItems = [],
 }) => {
   const { latestActualQuarter, nextQuarter, metricSeries } = metricForecast;
   const [selectedMetricKey, setSelectedMetricKey] = useState<string>(
     metricSeries[0]?.key ?? '',
   );
+  const [selectedNews, setSelectedNews] = useState<CompanyInsightItem | null>(null);
 
   useEffect(() => {
     if (!metricSeries.length) {
@@ -87,6 +94,7 @@ const MetricForecastChartPanel: React.FC<MetricForecastChartPanelProps> = ({
 
   const indicatorPrediction = selectedMetric?.label ?? '지표';
   const forecastLabel = nextQuarter ? `${nextQuarter}(예측)` : '예측';
+  const cappedNewsItems = newsItems.slice(0, 10);
 
   return (
     <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_0_40px_rgba(59,130,246,0.12)] flex flex-col gap-6">
@@ -189,6 +197,39 @@ const MetricForecastChartPanel: React.FC<MetricForecastChartPanelProps> = ({
       <AiCommentaryCard
         commentary={commentary}
         variant="embedded"
+      />
+      <ReportSummaryCard summary={reportSummary} />
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.3em] text-slate-500">뉴스 카드</p>
+            <p className="text-xs text-slate-400">최대 10건까지 확인할 수 있습니다.</p>
+          </div>
+        </div>
+        {cappedNewsItems.length === 0 ? (
+          <p className="text-sm text-slate-500">표시할 뉴스가 없습니다.</p>
+        ) : (
+          <div className="grid gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {cappedNewsItems.map((newsItem, index) => (
+              <button
+                key={newsItem.id ?? `${newsItem.title}-${index}`}
+                type="button"
+                onClick={() => setSelectedNews(newsItem)}
+                className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-left text-xs text-slate-200 transition hover:border-white/30 hover:bg-white/10"
+              >
+                <span className="block text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  News {index + 1}
+                </span>
+                <span className="mt-1 block line-clamp-2">{newsItem.title}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <CompanyNewsModal
+        open={Boolean(selectedNews)}
+        news={selectedNews}
+        onClose={() => setSelectedNews(null)}
       />
     </div>
   );

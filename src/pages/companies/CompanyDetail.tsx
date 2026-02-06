@@ -4,9 +4,9 @@ import { Link, useParams } from 'react-router-dom';
 import AsyncState from '../../components/common/AsyncState';
 import MetricForecastChartPanel from '../../components/companyDetail/MetricForecastChartPanel';
 import MetricsPanel from '../../components/companyDetail/MetricsPanel';
-import { getCompanyOverview } from '../../api/companies';
-import { getMockCompanyOverview } from '../../mocks/companies.mock';
-import { CompanyOverview } from '../../types/company';
+import { getCompanyInsights, getCompanyOverview } from '../../api/companies';
+import { getMockCompanyInsights, getMockCompanyOverview } from '../../mocks/companies.mock';
+import { CompanyInsightItem, CompanyOverview } from '../../types/company';
 import {
   getCompanyStatusFromHealth,
   getCompanyHealthScore,
@@ -31,6 +31,8 @@ const CompanyDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [fallbackMessage, setFallbackMessage] = useState<string | null>(null);
   const [detail, setDetail] = useState<CompanyOverview | null>(null);
+  const [insights, setInsights] = useState<CompanyInsightItem[]>([]);
+  const [insightsFallbackMessage, setInsightsFallbackMessage] = useState<string | null>(null);
 
   const loadDetail = async () => {
     if (!id) {
@@ -54,13 +56,31 @@ const CompanyDetailPage: React.FC = () => {
     }
   };
 
+  const loadInsights = async () => {
+    if (!id) {
+      return;
+    }
+
+    setInsightsFallbackMessage(null);
+    try {
+      const response = await getCompanyInsights(id);
+      setInsights(response ?? []);
+    } catch (err) {
+      setInsights(getMockCompanyInsights(id));
+      setInsightsFallbackMessage('인사이트 API 오류로 목 데이터를 표시하고 있어요.');
+    }
+  };
+
   useEffect(() => {
     void loadDetail();
+    void loadInsights();
   }, [id]);
 
   const healthScore = detail ? getCompanyHealthScore(detail.company) : 0;
   const statusLabel = detail ? getCompanyStatusFromHealth(healthScore) : '—';
   const metricForecast = toMetricForecast(detail?.forecast);
+  const reportInsight = insights.find((item) => item.type === 'REPORT');
+  const newsInsights = insights.filter((item) => item.type === 'NEWS').slice(0, 10);
   const normalizedKeyMetrics = detail?.keyMetrics?.map((metric) => {
     if (metric.key === 'ANNUAL_REVENUE' || metric.label === '연 매출') {
       return {
@@ -134,6 +154,11 @@ const CompanyDetailPage: React.FC = () => {
             {fallbackMessage}
           </div>
         )}
+        {insightsFallbackMessage && (
+          <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 px-6 py-4 text-sm text-amber-100">
+            {insightsFallbackMessage}
+          </div>
+        )}
         {detail && (
           <>
             <header className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -180,6 +205,8 @@ const CompanyDetailPage: React.FC = () => {
               <MetricForecastChartPanel
                 metricForecast={metricForecast}
                 commentary={detail.aiComment ?? ''}
+                reportSummary={reportInsight?.body ?? reportInsight?.content ?? ''}
+                newsItems={newsInsights}
               />
               <MetricsPanel metrics={metrics} signals={signals} />
             </div>

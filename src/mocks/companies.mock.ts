@@ -3,6 +3,7 @@ import {
   CompanyOverview,
   CompanySummary,
   CompanyTimelineItem,
+  CompanyInsightItem,
   ForecastResponse,
   MetricItem,
   SignalLight,
@@ -269,6 +270,44 @@ const COMPANY_COMMENTS: Record<string, string> = {
   'c-005':
     '솔라젠에너지는 매출액영업이익률 하락과 함께 CFO_매출액비율이 약화되고 있습니다.\n유동부채비율과 단기차입금비율이 상승해 프로젝트 일정 지연 리스크가 커진 상태이니,\n공급망 리드타임과 단기 자금 조달 계획을 점검하세요.',
 };
+
+export const getMockCompanyInsights = (companyId: string): CompanyInsightItem[] => [
+  {
+    id: `${companyId}-report`,
+    title: '사업보고서 요약',
+    body:
+      '최근 분기 사업보고서 기준 매출 성장률은 완만한 상승세입니다.\n' +
+      '주요 고객사 매출 비중이 확대되었으며, 원가율 개선 흐름이 확인됩니다.\n' +
+      '단기 차입 비중이 증가하여 현금흐름 관리가 필요합니다.',
+    source: '사업보고서',
+    publishedAt: '2026-02-01',
+    type: 'REPORT',
+  },
+  {
+    id: `${companyId}-news-1`,
+    title: '주요 공급 계약 연장 발표',
+    body: '주요 공급 계약이 2년 연장되며 매출 안정성이 강화되었습니다.',
+    source: 'News',
+    publishedAt: '2026-02-03',
+    type: 'NEWS',
+  },
+  {
+    id: `${companyId}-news-2`,
+    title: '신규 생산라인 투자 계획',
+    body: '신규 생산라인 투자로 생산량 확대와 원가 절감이 기대됩니다.',
+    source: 'News',
+    publishedAt: '2026-02-02',
+    type: 'NEWS',
+  },
+  {
+    id: `${companyId}-news-3`,
+    title: '환경 규제 대응 로드맵 공개',
+    body: '환경 규제 대응을 위한 중장기 감축 로드맵을 발표했습니다.',
+    source: 'News',
+    publishedAt: '2026-01-30',
+    type: 'NEWS',
+  },
+];
 
 export const COMPANY_TIMELINES: Record<string, CompanyTimelineItem[]> = INITIAL_COMPANIES.reduce(
   (acc, company) => {

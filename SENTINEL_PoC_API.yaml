@@ -205,6 +205,53 @@ paths:
               schema:
                 $ref: '#/components/schemas/CompanyOverview'
 
+  /companies/{companyId}/insights:
+    get:
+      tags: [Companies]
+      summary: Company report/news insights
+      description: >
+        Returns insights list for a company.
+
+        Use the `type` field to distinguish REPORT vs NEWS items.
+      parameters:
+        - in: path
+          name: companyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Company insight list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompanyInsightItem'
+              example:
+                - id: c-001-report
+                  type: REPORT
+                  title: 2025년 4분기 사업보고서 요약
+                  body: >-
+                    매출은 전년 동기 대비 4.2% 성장했습니다.
+                    영업이익률은 개선되었으나 단기차입금 비중이 증가했습니다.
+                  source: 사업보고서
+                  publishedAt: 2026-02-01
+                - id: c-001-news-1
+                  type: NEWS
+                  title: 주요 공급 계약 연장 발표
+                  body: 주요 공급 계약이 2년 연장되며 매출 안정성이 강화되었습니다.
+                  source: 조선비즈
+                  publishedAt: 2026-02-03
+                  url: https://news.example.com/1
+                - id: c-001-news-2
+                  type: NEWS
+                  title: 신규 생산라인 투자 계획
+                  body: 신규 생산라인 투자로 생산량 확대와 원가 절감이 기대됩니다.
+                  source: 한국경제
+                  publishedAt: 2026-02-02
+                  url: https://news.example.com/2
+
   /companies/{companyId}/update-requests:
     post:
       tags: [UpdateRequests]
@@ -484,3 +531,26 @@ components:
         message:
           type: string
       required: [message]
+
+    CompanyInsightItem:
+      type: object
+      properties:
+        id:
+          oneOf:
+            - type: string
+            - type: integer
+        title:
+          type: string
+        body:
+          type: string
+        content:
+          type: string
+        source:
+          type: string
+        publishedAt:
+          type: string
+        url:
+          type: string
+        type:
+          type: string
+          enum: [REPORT, NEWS]
