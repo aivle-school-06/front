@@ -10,11 +10,9 @@ import {
   YAxis,
 } from 'recharts';
 import { ForecastResponse, MetricSeries } from '../../types/company';
-import AiCommentaryCard from './AiCommentaryCard';
 
 interface MetricForecastChartPanelProps {
   metricForecast: ForecastResponse;
-  commentary: string;
 }
 
 const parseQuarter = (quarter: string) => {
@@ -35,7 +33,6 @@ const shiftQuarter = (quarter: string, delta: number) => {
 
 const MetricForecastChartPanel: React.FC<MetricForecastChartPanelProps> = ({
   metricForecast,
-  commentary,
 }) => {
   const { latestActualQuarter, nextQuarter, metricSeries } = metricForecast;
   const [selectedMetricKey, setSelectedMetricKey] = useState<string>(
@@ -186,10 +183,6 @@ const MetricForecastChartPanel: React.FC<MetricForecastChartPanelProps> = ({
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <AiCommentaryCard
-        commentary={commentary}
-        variant="embedded"
-      />
     </div>
   );
 };

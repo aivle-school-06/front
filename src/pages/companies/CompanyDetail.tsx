@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import AsyncState from '../../components/common/AsyncState';
 import MetricForecastChartPanel from '../../components/companyDetail/MetricForecastChartPanel';
 import MetricsPanel from '../../components/companyDetail/MetricsPanel';
+import AiCommentaryCard from '../../components/companyDetail/AiCommentaryCard';
 import { getCompanyOverview } from '../../api/companies';
 import { getMockCompanyOverview } from '../../mocks/companies.mock';
 import { CompanyOverview } from '../../types/company';
@@ -177,10 +178,13 @@ const CompanyDetailPage: React.FC = () => {
             </header>
 
             <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-              <MetricsPanel metrics={metrics} signals={signals} />
-              <MetricForecastChartPanel
-                metricForecast={metricForecast}
+              <div className="space-y-8">
+                <MetricForecastChartPanel metricForecast={metricForecast} />
+                <MetricsPanel metrics={metrics} signals={signals} />
+              </div>
+              <AiCommentaryCard
                 commentary={detail.aiComment ?? ''}
+                variant="embedded"
               />
             </div>
           </>
