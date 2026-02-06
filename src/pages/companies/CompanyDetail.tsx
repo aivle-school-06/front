@@ -177,11 +177,11 @@ const CompanyDetailPage: React.FC = () => {
             </header>
 
             <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
+              <MetricsPanel metrics={metrics} signals={signals} />
               <MetricForecastChartPanel
                 metricForecast={metricForecast}
                 commentary={detail.aiComment ?? ''}
               />
-              <MetricsPanel metrics={metrics} signals={signals} />
             </div>
           </>
         )}
