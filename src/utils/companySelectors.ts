@@ -44,6 +44,9 @@ export const getHealthTone = (score: number): 'good' | 'warn' | 'risk' => {
 export const getCompanyRevenue = (company: CompanySummary): number =>
   company.kpi?.annualRevenue ?? 0;
 
+export const getCompanyExternalHealthScore = (company: CompanySummary): number =>
+  company.kpi?.reputationScore ?? 0;
+
 export const getMetricValue = (metrics: MetricItem[] | undefined, key: string): number | null => {
   if (!metrics) return null;
   const metric = metrics.find((item) => item.key === key);
