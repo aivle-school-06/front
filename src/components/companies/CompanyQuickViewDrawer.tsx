@@ -2,12 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { CompanyOverview, CompanySummary } from '../../types/company';
 import {
-  formatCompanyRevenue,
   getCompanyHealthScore,
   getCompanyStatusFromHealth,
   getHealthTone,
-  getCompanyRevenue,
-  getMetricValue,
 } from '../../utils/companySelectors';
 import { getCompanyTimeline } from '../../mocks/companies.mock';
 
@@ -49,9 +46,8 @@ const CompanyQuickViewDrawer: React.FC<CompanyQuickViewDrawerProps> = ({
     : null;
   const healthScore = summaryAsPreview ? getCompanyHealthScore(summaryAsPreview) : 0;
   const healthTone = getHealthTone(healthScore);
-  const revenueValue =
-    getMetricValue(detail?.keyMetrics, 'ANNUAL_REVENUE') ??
-    (summaryAsPreview ? getCompanyRevenue(summaryAsPreview) : 0);
+  const externalHealthScore = summaryAsPreview?.kpi?.reputationScore ?? 0;
+  const externalHealthTone = getHealthTone(externalHealthScore);
   const statusLabel = summary ? getCompanyStatusFromHealth(healthScore) : '—';
 
   return (
@@ -95,7 +91,7 @@ const CompanyQuickViewDrawer: React.FC<CompanyQuickViewDrawerProps> = ({
           <div className="space-y-10">
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500">네트워크 건강도</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500">내부 건강도</span>
                 <div
                   className={`mt-3 text-2xl font-light ${
                     healthTone === 'good'
@@ -109,9 +105,17 @@ const CompanyQuickViewDrawer: React.FC<CompanyQuickViewDrawerProps> = ({
                 </div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500">연 매출</span>
-                <div className="mt-3 text-2xl font-light text-white">
-                  {formatCompanyRevenue(revenueValue)}
+                <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500">외부 건강도</span>
+                <div
+                  className={`mt-3 text-2xl font-light ${
+                    externalHealthTone === 'good'
+                      ? 'text-emerald-300'
+                      : externalHealthTone === 'warn'
+                      ? 'text-amber-300'
+                      : 'text-rose-300'
+                  }`}
+                >
+                  {externalHealthScore}%
                 </div>
               </div>
             </div>

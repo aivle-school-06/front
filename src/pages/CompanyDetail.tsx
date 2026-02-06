@@ -61,7 +61,24 @@ const CompanyDetailPage: React.FC = () => {
   const healthScore = detail ? getCompanyHealthScore(detail.company) : 0;
   const statusLabel = detail ? getCompanyStatusFromHealth(healthScore) : '—';
   const metricForecast = toMetricForecast(detail?.forecast);
-  const metrics = toMetricCards(detail?.keyMetrics);
+  const normalizedKeyMetrics = detail?.keyMetrics?.map((metric) => {
+    if (metric.key === 'ANNUAL_REVENUE' || metric.label === '연 매출') {
+      return {
+        ...metric,
+        key: 'EXTERNAL_HEALTH',
+        label: '외부 건강도',
+        value: detail.company.kpi?.reputationScore ?? detail.company.overallScore,
+        unit: '%',
+        tooltip: {
+          description: '외부 평판·시장 신호를 종합한 건강도 지표입니다.',
+          interpretation: '높을수록 대외 리스크 신호가 안정적입니다.',
+          actionHint: '하락 시 외부 이슈 모니터링과 커뮤니케이션을 점검하세요.',
+        },
+      };
+    }
+    return metric;
+  });
+  const metrics = toMetricCards(normalizedKeyMetrics);
   const signals = toSignalCards(detail?.signals);
 
   const buildReportContent = (companyDetail: CompanyOverview) => {
